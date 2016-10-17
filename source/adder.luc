@@ -1,0 +1,19 @@
+module adder (
+  input a[8],
+  input b[8],
+  input alufn[6],
+  output sum[8]
+
+    
+  ) { 
+  
+  always {
+    sum = 0;
+      case(alufn[1:0]){
+        00:
+          sum = a + b;
+        01:
+          sum = a - b;  
+    } 
+  }
+}

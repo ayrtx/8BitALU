@@ -11,7 +11,7 @@ module mojo_top (
     input avr_tx,           // AVR TX (FPGA RX)
     //output avr_rx,          // AVR RX (FPGA TX)
     input avr_rx_busy,      // AVR RX buffer full
-    output io_led [3][8],   // LEDs on IO Shield
+    output io_led [1][8],   // LEDs on IO Shield
     //output io_seg [8],      // 7-segment LEDs on IO Shield
     //output io_sel [4],      // Digit select on IO Shield
     //input io_button [5],    // 5 buttons on IO Shield
@@ -20,16 +20,67 @@ module mojo_top (
   
   
   sig rst;                  // reset signal
-  add add;   //error here
+  //sig result[8];
+  
   
   .clk(clk) {
     // The reset conditioner is used to synchronize the reset signal to the FPGA
     // clock. This ensures the entire FPGA comes out of reset at the same time.
     reset_conditioner reset_cond;
+    //fsm state = {ADDER, COMPARE, BOOLEAN, SHR, SHL, SHA}; 
   }
+  
+  adder adder;
+  zvn zvn;
+  mult mult;
+  
   always {
   reset_cond.in = ~rst_n; // input raw inverted reset signal
   rst = reset_cond.out;   // conditioned reset 
-  io_led[0] = add.sum;  
+    
+  io_led[0] = 0;
+    
+  adder.alufn=io_dip[2][5:0];
+  adder.a = io_dip[1];
+  adder.b = io_dip[0];
+    
+  zvn.a = io_dip[1];
+  zvn.b = io_dip[0];
+  zvn.sum = adder.sum;
+  
+  mult.a = io_dip[1];
+  mult.b = io_dip[0];
+  
+  if (io_dip[2][5:0] == c{0,0,0,0,0,1|0}){
+    io_led[0] = adder.sum;
+    }
+  if (io_dip[2][5:0] == c{0,0,0,0,1,0}){
+    io_led[0] = mult.multiplied;
+    }
+  if (io_dip[2][5:0] == c{0,1,1,0,0,0}){
+    //AND
+    }
+  if (io_dip[2][5:0] == c{0,1,1,1,1,0}){
+    //OR
+    }
+  if (io_dip[2][5:0] == c{0,1,0,1,1,0}){
+    //XOR
+    }
+  if (io_dip[2][5:0] == c{0,1,1,0,1,0}){
+    //"A" LDR
+    }
+  if (io_dip[2][5:0] == c{1,0,0,0,0,0}){
+    //SHL
+    }
+  if (io_dip[2][5:0] == c{1,0,0,0,0,1}){
+    //SHR
+    }
+  if (io_dip[2][5:0] == c{1,0,0,0,1,1}){
+    //SRA
+    }
+  if (io_dip[2][5:0] == c{1,1,0,1|0,1|0,1}){
+    //COMPARE
+    }
+ 
   }
 }

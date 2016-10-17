@@ -1,0 +1,10 @@
+module mult (
+    input a[8],
+    input b[8],
+    output multiplied[8]
+  ) {
+
+  always {
+    multiplied = a * b;
+  }
+}
