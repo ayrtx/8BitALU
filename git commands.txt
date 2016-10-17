@@ -1,0 +1,11 @@
+git clone "https://github.com/ayrtx/8BitALU"
+
+git pull "https://github.com/ayrtx/8BitALU"
+
+cd .\8BitALU\source
+
+git add .\filename.luc
+
+git commit -m "Comment"
+
+git push
