@@ -34,6 +34,8 @@ module mojo_top (
   zvn zvn;
   mult mult;
   shifter8 shifter;
+  compare8 compare;
+  divMod divMod;
   
   always {
   reset_cond.in = ~rst_n; // input raw inverted reset signal
@@ -56,21 +58,38 @@ module mojo_top (
   shifter.alufn=io_dip[2][5:0];
   shifter.a = io_dip[1];
   shifter.b = io_dip[0];
+  
+  compare.alufn=io_dip[2][5:0];
+  compare.z = zvn.z;
+  compare.v = zvn.v;
+  compare.n = zvn.n;
+  
+  divMod.alufn=io_dip[2][5:0];
+  divMod.a = io_dip[1];
+  divMod.b = io_dip[0];
     
   case(io_dip[2][5:0]){
       000000: io_led[0] = adder.sum;
       000001: io_led[0] = adder.sum;
       000010: io_led[0] = mult.multiplied;
+      000100: io_led[0] = divMod.out;
+      000110: io_led[0] = divMod.out;
       //011000: AND
       //011110: OR
       //010110: XOR
       //011010: "A" LDR
+      //010101: "B"
+      //010111: NAND
+      //010001: NOR
+      //011001: XNOR
       100000: io_led[0] = shifter.shift;
       100001: io_led[0] = shifter.shift;
       100011: io_led[0] = shifter.shift;
-      //110011: CMP
-      //110101: CMP
-      //110111: CMP
+      110011: io_led[0] = compare.cmp;
+      110101: io_led[0] = compare.cmp;
+      110111: io_led[0] = compare.cmp;
+      111001: io_led[0] = compare.cmp;
+      111011: io_led[0] = compare.cmp;
       }  
   }
 }
