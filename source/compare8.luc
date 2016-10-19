@@ -1,0 +1,25 @@
+module compare8 (
+    input z,
+    input v,
+    input n,
+    input alufn[6],
+    output cmp[8]
+  ) {
+
+  always {
+    cmp[7:1] = 0;
+  
+    case(alufn[3:1]){
+      b001:
+        cmp[0] = z;
+      b010:
+        cmp[0] = n ^ v;
+      b011:
+        cmp[0] = z | (n ^ v);
+      b100:
+        cmp[0] = !(z | (n ^ v));
+      b101:
+        cmp[0] = !(n ^ v);
+    }
+  }
+}
