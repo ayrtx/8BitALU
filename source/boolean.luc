@@ -1,4 +1,4 @@
-module boole32 (
+module boole8 (
     input alufn[6],   
     input a[8],
     input b[8],
