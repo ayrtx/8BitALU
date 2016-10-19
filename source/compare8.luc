@@ -10,15 +10,15 @@ module compare8 (
     cmp[7:1] = 0;
   
     case(alufn[3:1]){
-      b001:
+      b001: // compare equal
         cmp[0] = z;
-      b010:
+      b010: // compare less than
         cmp[0] = n ^ v;
-      b011:
+      b011: // compare less than or equal
         cmp[0] = z | (n ^ v);
-      b100:
+      b100: // compare greater than
         cmp[0] = !(z | (n ^ v));
-      b101:
+      b101: // compare greater than or equal
         cmp[0] = !(n ^ v);
     }
   }
