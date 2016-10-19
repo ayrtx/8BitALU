@@ -1,0 +1,30 @@
+module boole32 (
+    input alufn[6],   
+    input a[8],
+    input b[8],
+    output boole[8]
+  ) {
+  
+  var i;
+  var n;
+  sig temp[8];
+  always {
+    temp=b0;
+    for (i = 0; i < 8; i++) {
+
+      n = (a[i] *2) + b[i];
+      case(n) {
+        b00:
+          temp [i] = alufn[0];
+        b01:
+           temp[i] = alufn[1];
+        b10:
+          temp[i] = alufn[2];
+        b11:
+          temp[i] = alufn[3];
+      
+      }
+      boole=temp;
+  }
+    
+}
