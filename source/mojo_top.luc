@@ -33,6 +33,7 @@ module mojo_top (
   adder adder;
   zvn zvn;
   mult mult;
+  shifter8 shifter;
   
   always {
   reset_cond.in = ~rst_n; // input raw inverted reset signal
@@ -47,40 +48,29 @@ module mojo_top (
   zvn.a = io_dip[1];
   zvn.b = io_dip[0];
   zvn.sum = adder.sum;
+  zvn.alufn = io_dip[2][5:0];
   
   mult.a = io_dip[1];
   mult.b = io_dip[0];
   
-  if (io_dip[2][5:0] == c{0,0,0,0,0,1|0}){
-    io_led[0] = adder.sum;
-    }
-  if (io_dip[2][5:0] == c{0,0,0,0,1,0}){
-    io_led[0] = mult.multiplied;
-    }
-  if (io_dip[2][5:0] == c{0,1,1,0,0,0}){
-    //AND
-    }
-  if (io_dip[2][5:0] == c{0,1,1,1,1,0}){
-    //OR
-    }
-  if (io_dip[2][5:0] == c{0,1,0,1,1,0}){
-    //XOR
-    }
-  if (io_dip[2][5:0] == c{0,1,1,0,1,0}){
-    //"A" LDR
-    }
-  if (io_dip[2][5:0] == c{1,0,0,0,0,0}){
-    //SHL
-    }
-  if (io_dip[2][5:0] == c{1,0,0,0,0,1}){
-    //SHR
-    }
-  if (io_dip[2][5:0] == c{1,0,0,0,1,1}){
-    //SRA
-    }
-  if (io_dip[2][5:0] == c{1,1,0,1|0,1|0,1}){
-    //COMPARE
-    }
- 
+  shifter.alufn=io_dip[2][5:0];
+  shifter.a = io_dip[1];
+  shifter.b = io_dip[0];
+    
+  case(io_dip[2][5:0]){
+      000000: io_led[0] = adder.sum;
+      000001: io_led[0] = adder.sum;
+      000010: io_led[0] = mult.multiplied;
+      //011000: AND
+      //011110: OR
+      //010110: XOR
+      //011010: "A" LDR
+      100000: io_led[0] = shifter.shift;
+      100001: io_led[0] = shifter.shift;
+      100011: io_led[0] = shifter.shift;
+      //110011: CMP
+      //110101: CMP
+      //110111: CMP
+      }  
   }
 }
