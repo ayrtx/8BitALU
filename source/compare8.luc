@@ -1,13 +1,13 @@
 module compare8 (
-    input z,
-    input v,
-    input n,
-    input alufn[6],
-    output cmp[8]
+    input z,              //input of z
+    input v,              //input of v
+    input n,              //input of n
+    input alufn[6],       //input of alufn
+    output cmp[8]         //output of comparable
   ) {
 
   always {
-    cmp[7:1] = 0;
+    cmp[7:0] = 0;          //initialising cmp
   
     case(alufn[3:1]){
       b001: // compare equal
