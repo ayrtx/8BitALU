@@ -1,13 +1,13 @@
 module boolean (
-    input alufn[6],   
-    input a[8],
-    input b[8],
-    output boole[8]
+    input alufn[6],            //input of alufu   
+    input a[8],                //input of a
+    input b[8],                //input of b
+    output boole[8]            //output of boolean
   ) {
-  
-  var i;
+
+  var i;          //declaring variable i in for loop
   var n;
-  sig temp[8];
+  sig temp[8];    //declaring signal to store temporary array
   always {
     temp=b0;
     for (i = 0; i < 8; i++) {
