@@ -14,7 +14,7 @@ module adder (
           sum = a + b; //summation of a and b
           
         b01:
-          sum = a - b;  
-    } 
+          sum = a - b;  //subtraction of a and b
+    }  
   }
 }
