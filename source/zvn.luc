@@ -1,21 +1,21 @@
 module zvn (
-    input alufn[6],
-    input a[8],
-    input b[8],
-    output z,
-    output v,
-    output n
+    input alufn[6],       //input of alufn
+    input a[8],           //input of a
+    input b[8],           //input of b
+    output z,             //output of z
+    output v,             //output of v
+    output n              //output of n
     
   ) {
-  sig sum[8];
+  sig sum[8];             //declaring signal sum 
 
-  always {
-    sum = a - b;
-    if (sum == 0){
-      z = 1;}
+  always {          
+    sum = a - b;         //subtraction of a and b;  
+    if (sum == 0){       
+      z = 1;}            //if sum==0, output of z is 1
     else{
-      z = 0;}
-    n = sum[7];
-    v = (a[7] & (b[7] ^ alufn[0]) & ~sum[7]) | (~a[7] & ~(b[7] ^ alufn[0]) & sum[7]);
+      z = 0;}            //if sum !=0, output of z is 0
+    n = sum[7];          //output of n is most significant bit of a-b
+    v = (a[7] & (b[7] ^ alufn[0]) & ~sum[7]) | (~a[7] & ~(b[7] ^ alufn[0]) & sum[7]);     //return 1 if output of addition operation overflows, if not, return 0
   }
 }
