@@ -1,14 +1,14 @@
 module adder (
-  input a[8],
-  input b[8],
-  input alufn[6],
-  output sum[8]
+  input a[8],       //input of a
+  input b[8],       //input of b
+  input alufn[6],   //input of alufu
+  output sum[8]     //output of adder
 
     
   ) { 
   
   always {
-    sum = 0;
+    sum = 0;    //initialising sum
       case(alufn[1:0]){
         b00:
           sum = a + b; //summation of a and b
