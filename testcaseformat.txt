@@ -1,0 +1,27 @@
+    case(state.q) {
+    
+    state.ERROR: // Stop Machine at test case number
+        io_led[2] = test_case_counter;
+    
+    state.ADD_TEST1: //Test case 1: 100+28 = -128
+        test_case_counter.d = test_case_counter.q+1;
+        adder.alufn = b000000; 
+        adder.a = b01100100;
+        adder.b = b00011100;
+        result = adder.sum; 
+        io_led[0] = b01100100;
+        io_led[1] = b00011100;
+        if (currentCounter == 26b1)
+            if (alu == b10000000) state.d = state.ADD_TEST2;
+            else state.d = state.ADD_ERROR;
+    state.ADD_TEST2: //Test case 2: 100+28 = -128
+        adder.alufn = b000000; 
+        adder.a = b01100100;
+        adder.b = b00011100;
+        result = adder.sum; 
+        io_led[0] = b01100100;
+        io_led[1] = b00011100;
+        if (currentCounter == 26b1)
+            if (alu == b10000000) state.d = state.ADD_TEST2;
+            else state.d = state.ADD_ERROR;
+    }
