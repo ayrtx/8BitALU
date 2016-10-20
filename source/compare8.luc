@@ -17,9 +17,9 @@ module compare8 (
       b011: // compare less than or equal
         cmp[0] = z | (n ^ v);
       b100: // compare greater than
-        cmp[0] = !(z | (n ^ v));
+        cmp[0] = ~(z | (n ^ v));
       b101: // compare greater than or equal
-        cmp[0] = !(n ^ v);
+        cmp[0] = ~(n ^ v);
     }
   }
 }
