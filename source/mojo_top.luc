@@ -15,7 +15,9 @@ module mojo_top (
     //output io_seg [8],      // 7-segment LEDs on IO Shield
     //output io_sel [4],      // Digit select on IO Shield
     //input io_button [5],    // 5 buttons on IO Shield
-    input io_dip [3][8]     // DIP switches on IO Shield
+    input io_dip [3][8],     // DIP switches on IO Shield
+    output a[8],
+    output b[8]
   ) {
   
   
@@ -27,7 +29,15 @@ module mojo_top (
     // The reset conditioner is used to synchronize the reset signal to the FPGA
     // clock. This ensures the entire FPGA comes out of reset at the same time.
     reset_conditioner reset_cond;
-    //fsm state = {ADDER, COMPARE, BOOLEAN, SHR, SHL, SHA}; 
+    .rst(rst) {
+      fsm state(.clk(clk), #INIT(TURNEDOFF)) = {ADD,SUB, MULT, ABS, AND, OR, XOR, A,B,NAND,NOR,XNOR,CONSTM1,CONST0,SHL,SHR,SRA,RL,RR,CMPEQ,CMPLT,CMPLE,CMPGT,CMPGE};
+      // Finite state machine declaration. The starting sate is TURNEDOFF whereby the FPGA is in idle state.
+      // The next 8 states are named corresponding to what the inputs are. The state is named in the format Carry-in, B, A. O is 0 while I is 1.
+      //So if the state is OOI, the inputs for the carry and B are 0 while the input for A is 1.
+      
+      timeChange changeState; // instantiate a copy of timeChange and named it changeState
+      }
+  
   }
   
   adder adder;
@@ -35,9 +45,10 @@ module mojo_top (
   mult mult;
   shifter8 shifter;
   compare8 compare;
-  divMod divMod;
+  boolean boole;
   
   always {
+
   reset_cond.in = ~rst_n; // input raw inverted reset signal
   rst = reset_cond.out;   // conditioned reset 
     
@@ -64,29 +75,29 @@ module mojo_top (
   compare.v = zvn.v;
   compare.n = zvn.n;
   
-  divMod.alufn=io_dip[2][5:0];
-  divMod.a = io_dip[1];
-  divMod.b = io_dip[0];
-    
+  boole.alufn=io_dip[2][5:0];
+  boole.a = io_dip[1];
+  boole.b = io_dip[0];
+  
+  case(io_dip[2][6]){
+  b1:
   case(io_dip[2][5:0]){
       000000: 
         io_led[0] = adder.sum;
       //  if (adder.sum != a + b) err;
       000001: io_led[0] = adder.sum;
       000010: io_led[0] = mult.multiplied;
-      //000011: io_led[0] = mult.multiplied;
-      //000100: io_led[0] = divMod.out;
-      //000110: io_led[0] = divMod.out;
-      //011000: AND
-      //011110: OR
-      //010110: XOR
-      //011010: "A" LDR
-      //010101: "B"
-      //010111: NAND
-      //010001: NOR
-      //011001: XNOR
-      //011111: CONSTM1
-      //010000: CONST0
+      000011: io_led[0] = mult.multiplied;
+      011000: io_led[0] = boolean.boole        //AND
+      011110: io_led[0] = boolean.boole         //OR
+      010110: io_led[0] = boolean.boole         //XOR
+      011010: io_led[0] = boolean.boole         //"A" LDR
+      010101: io_led[0] = boolean.boole         //"B"
+      010111: io_led[0] = boolean.boole         //NAND
+      010001: io_led[0] = boolean.boole         //NOR
+      011001: io_led[0] = boolean.boole         //XNOR
+      011111: io_led[0] = boolean.boole         //CONSTM1
+      010000: io_led[0] = boolean.boole         //CONST0
       100000: io_led[0] = shifter.shift;
       100001: io_led[0] = shifter.shift;
       100011: io_led[0] = shifter.shift;
@@ -97,6 +108,16 @@ module mojo_top (
       110111: io_led[0] = compare.cmp;
       111001: io_led[0] = compare.cmp;
       111011: io_led[0] = compare.cmp;
-      }  
+      }
+   b0:
+    if (counter==26b1){
+    b++;
+    if(b>255||alufn[5:4] && b>7){
+    b=0;
+    a++;
+    if(a>255){
+        a=0;
+        alufn.next;   
+    }    
   }
 }
