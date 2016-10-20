@@ -9,11 +9,11 @@ module adder (
   
   always {
     sum = 0;    //initialising sum
-      case(alufn[1:0]){
-        b00:
+      case(alufn[0]){
+        b0:
           sum = a + b; //summation of a and b
           
-        b01:
+        b1:
           sum = a - b;  //subtraction of a and b
     }  
   }
