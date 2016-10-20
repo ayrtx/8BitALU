@@ -1,251 +1,535 @@
     case(state.q) {
     
-    state.ERROR: // Stop Machine at test case number
-        io_led[2] = test_case_counter;
+        state.RESET:
+            if (mode == 1)
+                test_case_counter = b00000000;
+                state.d = state.ADD_TEST1;
+        state.ERROR: // Stop Machine at test case number
+            io_led[2] = test_case_counter;
+        state.END: // Stop Machine at end of test cases
+            io_led[2] = b11111111;
+        
+        state.ADD_TEST1: //Test case 1: 100+28 = -128
+            test_case_counter.d = test_case_counter.q+1;
+            adder.alufn = b000000; 
+            adder.a = b01100100;
+            adder.b = b00011100;
+            result = adder.sum; 
+            io_led[0] = b01100100;
+            io_led[1] = b00011100;
+            if (currentCounter == 26b1)
+                if (result == b10000000) state.d = state.ADD_TEST2;
+                else state.d = state.ERROR;
+        state.ADD_TEST2: //Test case 2: 70 +12 = 82
+            adder.alufn = b000000; 
+            adder.a = b01000110;
+            adder.b = 000011000;
+            result = adder.sum; 
+            io_led[0] = b01000110;
+            io_led[1] = 000011000;
+            if (currentCounter == 26b1)
+                if (result == b01010010) state.d = state.SUB_TEST1;
+                else state.d = state.ERROR;
+        
+        state.SUB_TEST1: //Test case 3: 100-28 = 72
+            test_case_counter.d = test_case_counter.q+1;
+            adder.alufn = b000001; 
+            adder.a = b01100100;
+            adder.b = b00011100;
+            result = adder.sum; 
+            io_led[0] = b01100100;
+            io_led[1] = b00011100;
+            if (currentCounter == 26b1)
+                if (result == b01001000) state.d = state.SUB_TEST2;
+                else state.d = state.ERROR;
+        state.SUB_TEST2: //Test case 4: 70-12 = 58
+            test_case_counter.d = test_case_counter.q+1;
+            adder.alufn = b000001; 
+            adder.a = b01000110;
+            adder.b = b00001100;
+            result = adder.sum; 
+            io_led[0] = b01000110;
+            io_led[1] = b00001100;
+            if (currentCounter == 26b1)
+                if (result == b00111010) state.d = state.MULT_TEST1;
+                else state.d = state.ERROR;
+        
+        state.MULT_TEST1: //Test case 5: 7*2 = 14
+            test_case_counter.d = test_case_counter.q+1;
+            mult.alufn = b000010; 
+            mult.a = b0000111;
+            mult.b = b0000010;
+            result = mult.multiplied; 
+            io_led[0] = b0000111;
+            io_led[1] = b0000010;
+            if (currentCounter == 26b1)
+                if (result == b00001110) state.d = state.MULT_TEST2;
+                else state.d = state.ERROR;
+        state.MULT_TEST2: //Test case 6: 17*6=102
+            test_case_counter.d = test_case_counter.q+1;
+            mult.alufn = b000010; 
+            mult.a = b00010001;
+            mult.b = b00000110;
+            result = mult.multiplied;
+            io_led[0] = b00010001;
+            io_led[1] = b00000110;
+            if (currentCounter == 26b1)
+                if (result == b01100110) state.d = state.ABS_TEST1;
+                else state.d = state.ERROR;
+        
+        state.ABS_TEST1: //Test case 7: |-127| = 127
+            test_case_counter.d = test_case_counter.q+1;
+            mult.alufn = b000011; 
+            mult.a = b10000001;
+            mult.b = b00011100;
+            result = mult.multiplied; 
+            io_led[0] = b10000001;
+            io_led[1] = b00011100;
+            if (currentCounter == 26b1)
+                if (result == b01111111) state.d = state.ABS_TEST2;
+                else state.d = state.ERROR;
+        state.ABS_TEST2: //Test case 8: |-14| = 14
+            test_case_counter.d = test_case_counter.q+1;
+            mult.alufn = b000011; 
+            mult.a = b11110010;
+            mult.b = b11110010;
+            result = mult.multiplied; 
+            io_led[0] = b11110010;
+            io_led[1] = b11110010;
+            if (currentCounter == 26b1)
+                if (result == b00001110) state.d = state.AND_TEST1;
+                else state.d = state.ERROR;
+        
+        state.AND_TEST1: //Test case 9: 50 & 49 = 48
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b011000; 
+            boolean.a = b00110010;
+            boolean.b = b00110001;
+            result = boolean.boole; 
+            io_led[0] = b00110010;
+            io_led[1] = b00110001;
+            if (currentCounter == 26b1)
+                if (result == b00110000) state.d = state.AND_TEST2;
+                else state.d = state.ERROR;
+        state.AND_TEST2: //Test case 10: 13 & 18 = 0
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b011000; 
+            boolean.a = b00001101;
+            boolean.b = b00010010;
+            result = boolean.boole; 
+            io_led[0] = b00001101;
+            io_led[1] = b00010010;
+            if (currentCounter == 26b1)
+                if (result == b00000000) state.d = state.OR_TEST1;
+                else state.d = state.ERROR;
+        
+        state.OR_TEST1: //Test case 11: 47 || 63 =63
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b011110; 
+            boolean.a = b00101111;
+            boolean.b = b00111111;
+            result = boolean.boole; 
+            io_led[0] = b00101111;
+            io_led[1] = b00111111;
+            if (currentCounter == 26b1)
+                if (result == b00111111) state.d = state.OR_TEST2;
+                else state.d = state.ERROR;
+        state.OR_TEST2: //Test case 12: 23 || 42 =63
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b011110; 
+            boolean.a = b00001100;
+            boolean.b = b00010111;
+            result = boolean.boole; 
+            io_led[0] = b00001100;
+            io_led[1] = b00010111;
+            if (currentCounter == 26b1)
+                if (result == b00111111) state.d = state.XOR_TEST1;
+                else state.d = state.ERROR;
+        
+        state.XOR_TEST1: //Test case 13: 74 ^ 13 = 71
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b010110; 
+            boolean.a = b01001010;
+            boolean.b = b00001101;
+            result = boolean.boole; 
+            io_led[0] = b01001010;
+            io_led[1] = b00001101;
+            if (currentCounter == 26b1)
+                if (result == b01000111) state.d = state.XOR_TEST2;
+                else state.d = state.ERROR;
+        state.XOR_TEST2: //Test case 14: 00110011 ^ 01010101 = 01100110
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b010110; 
+            boolean.a = b00110011;
+            boolean.b = b01010101;
+            result = boolean.boole; 
+            io_led[0] = b00110011;
+            io_led[1] = b01010101;
+            if (currentCounter == 26b1)
+                if (result == b01100110) state.d = state.A_TEST2;
+                else state.d = state.ERROR;
+        
+        state.A_TEST1: //Test case 15: 33=33
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b011010; 
+            boolean.a = b00100001;
+            boolean.b = b00111100;
+            result = boolean.boole; 
+            io_led[0] = b00100001;
+            io_led[1] = b00111100;
+            if (currentCounter == 26b1)
+                if (result == b00100001) state.d = state.A_TEST2;
+                else state.d = state.ERROR;
+        state.A_TEST2: //Test case 16: result = a
+            boolean.alufn = b011010; 
+            boolean.a = b10110100;
+            boolean.b = b00111100;
+            result = boolean.boole; 
+            io_led[0] = b10110100;
+            io_led[1] = b00111100;
+            if (currentCounter == 26b1)
+                if (result == b10110100) state.d = state.B_TEST1;
+                else state.d = state.ERROR;
+        
+        state.B_TEST1: //Test case 17: 60=60
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b010101; 
+            boolean.a = b00100001;
+            boolean.b = b00111100;
+            result = boolean.boole; 
+            io_led[0] = b00100001;
+            io_led[1] = b00111100;
+            if (currentCounter == 26b1)
+                if (result == b00111100) state.d = state.B_TEST2;
+                else state.d = state.ERROR;
+        state.B_TEST2: //Test case 18: result = b
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b010101; 
+            boolean.a = b00100001;
+            boolean.b = b11000011;
+            result = boolean.boole; 
+            io_led[0] = b00100001;
+            io_led[1] = b11000011;
+            if (currentCounter == 26b1)
+                if (result == b11000011) state.d = state.NAND_TEST1;
+                else state.d = state.ERROR;
+        
+        state.NAND_TEST1: //Test case 19: ~(103 & 32)  = -65
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b010111; 
+            boolean.a = b01100111;
+            boolean.b = b00011100;
+            result = boolean.boole; 
+            io_led[0] = b01100111;
+            io_led[1] = b00011100;
+            if (currentCounter == 26b1)
+                if (result == b01000001) state.d = state.NAND_TEST2;
+                else state.d = state.ERROR;
+        state.NAND_TEST2: //Test case 20: 10011001 !& 01100111 = 11111110
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b010111; 
+            boolean.a = b10011001;
+            boolean.b = b01100111;
+            result = boolean.boole; 
+            io_led[0] = b10011001;
+            io_led[1] = b01100111;
+            if (currentCounter == 26b1)
+                if (result == b11111110) state.d = state.NOR_TEST1;
+                else state.d = state.ERROR;
+        
+        state.NOR_TEST1: //Test case 21: ~(13 | 24) = -30
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b010001; 
+            boolean.a = b00001101;
+            boolean.b = b00011000;
+            result = boolean.boole; 
+            io_led[0] = b00001101;
+            io_led[1] = b00011000;
+            if (currentCounter == 26b1)
+                if (result == b00011110) state.d = state.NOR_TEST2;
+                else state.d = state.ERROR;
+        state.NOR_TEST2: //Test case 22: 00011001 !| 01100111 = 10000000
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b010001; 
+            boolean.a = b00011001;
+            boolean.b = b01100111;
+            result = boolean.boole; 
+            io_led[0] = b00011001;
+            io_led[1] = b01100111;
+            if (currentCounter == 26b1)
+                if (result == b10000000) state.d = state.XNOR_TEST1;
+                else state.d = state.ERROR;
+        
+        state.XNOR_TEST1: //Test case 23: 10101010 ^ 11110000 = 10100101
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b011001; 
+            boolean.a = b10101010;
+            boolean.b = b11110000;
+            result = boolean.boole; 
+            io_led[0] = b10101010;
+            io_led[1] = b11110000;
+            if (currentCounter == 26b1)
+                if (result == b10100101) state.d = state.XNOR_TEST2;
+                else state.d = state.ERROR;
+        state.XNOR_TEST2: //Test case 24: 10001000 ^ 11110000 = 10000111
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b011001; 
+            boolean.a = b10001000;
+            boolean.b = b11110000;
+            result = boolean.boole; 
+            io_led[0] = b10001000;
+            io_led[1] = b11110000;
+            if (currentCounter == 26b1)
+                if (result == b10000111) state.d = state.CONSTM1_TEST1;
+                else state.d = state.ERROR;
     
-    state.ADD_TEST1: //Test case 1: 100+28 = -128
-        test_case_counter.d = test_case_counter.q+1;
-        adder.alufn = b000000; 
-        adder.a = b01100100;
-        adder.b = b00011100;
-        result = adder.sum; 
-        io_led[0] = b01100100;
-        io_led[1] = b00011100;
-        if (currentCounter == 26b1)
-            if (result == b10000000) state.d = state.ADD_TEST2;
-            else state.d = state.ERROR;
-    state.ADD_TEST2: //Test case 2: 70 +12 = 82
-        adder.alufn = b000000; 
-        adder.a = b01000110;
-        adder.b = 000011000;
-        result = adder.sum; 
-        io_led[0] = b01000110;
-        io_led[1] = 000011000;
-        if (currentCounter == 26b1)
-            if (result == b01010010) state.d = state.SUB_TEST1;
-            else state.d = state.ERROR;
-       
-    state.SUB_TEST1: //Test case 3: 100-28 = 72
-        test_case_counter.d = test_case_counter.q+1;
-        adder.alufn = b000001; 
-        adder.a = b01100100;
-        adder.b = b00011100;
-        result = adder.sum; 
-        io_led[0] = b01100100;
-        io_led[1] = b00011100;
-        if (currentCounter == 26b1)
-            if (result == b01001000) state.d = state.SUB_TEST2;
-            else state.d = state.ERROR;
-     state.SUB_TEST2: //Test case 4: 70-12 = 58
-        adder.alufn = b000001; 
-        adder.a = b01000110;
-        adder.b = b00001100;
-        result = adder.sum; 
-        io_led[0] = b01000110;
-        io_led[1] = b00001100;
-        if (currentCounter == 26b1)
-            if (result == b00111010) state.d = state.MULT_TEST1;
-            else state.d = state.ERROR;
-       
-    state.MULT_TEST1: //Test case 5: 7*2 = 14
-        test_case_counter.d = test_case_counter.q+1;
-        mult.alufn = b000010; 
-        mult.a = b0000111;
-        mult.b = b0000010;
-        result = mult.multiplied; 
-        io_led[0] = b0000111;
-        io_led[1] = b0000010;
-        if (currentCounter == 26b1)
-            if (result == b00001110) state.d = state.MULT_TEST2;
-            else state.d = state.ERROR;
-    state.MULT_TEST2: //Test case 6: 17*6=102
-        mult.alufn = b000010; 
-        mult.a = b00010001;
-        mult.b = b00000110;
-        result = mult.multiplied;
-        io_led[0] = b00010001;
-        io_led[1] = b00000110;
-        if (currentCounter == 26b1)
-            if (result == b01100110) state.d = state.ABS_TEST1;
-            else state.d = state.ERROR;
-       
-    state.ABS_TEST1: //Test case 7: |-127| = 127
-        test_case_counter.d = test_case_counter.q+1;
-        mult.alufn = b000011; 
-        mult.a = b10000001;
-        mult.b = b00011100;
-        result = mult.multiplied; 
-        io_led[0] = b10000001;
-        io_led[1] = b00011100;
-        if (currentCounter == 26b1)
-            if (result == b01111111) state.d = state.ABS_TEST2;
-            else state.d = state.ERROR;
-    state.ABS_TEST2: //Test case 8: |-14| = 14
-        mult.alufn = b000011; 
-        mult.a = b11110010;
-        mult.b = b11110010;
-        result = mult.multiplied; 
-        io_led[0] = b11110010;
-        io_led[1] = b11110010;
-        if (currentCounter == 26b1)
-            if (result == b00001110) state.d = state.AND_TEST1;
-            else state.d = state.ERROR;
-       
-    state.AND_TEST1: //Test case 9: 50 & 49 = 48
-        test_case_counter.d = test_case_counter.q+1;
-        boolean.alufn = 0b011000; 
-        boolean.a = b00110010;
-        boolean.b = b00110001;
-        result = boolean.boole; 
-        io_led[0] = b00110010;
-        io_led[1] = b00110001;
-        if (currentCounter == 26b1)
-            if (result == b00110000) state.d = state.AND_TEST2;
-            else state.d = state.ERROR;
-    state.AND_TEST2: //Test case 10: 13 & 18 = 0
-        boolean.alufn = 0b011000; 
-        boolean.a = b00001101;
-        boolean.b = b00010010;
-        result = boolean.boole; 
-        io_led[0] = b00001101;
-        io_led[1] = b00010010;
-        if (currentCounter == 26b1)
-            if (result == b00000000) state.d = state.OR_TEST1;
-            else state.d = state.ERROR;
-       
-     state.OR_TEST1: //Test case 11: 47 || 63 =63
-        test_case_counter.d = test_case_counter.q+1;
-        boolean.alufn = b011110; 
-        boolean.a = b00101111;
-        boolean.b = b00111111;
-        result = boolean.boole; 
-        io_led[0] = b00101111;
-        io_led[1] = b00111111;
-        if (currentCounter == 26b1)
-            if (result == b00111111) state.d = state.OR_TEST2;
-            else state.d = state.ERROR;
-    state.OR_TEST2: //Test case 12: 23 || 42 =63
-        boolean.alufn = b011110; 
-        boolean.a = b00001100;
-        boolean.b = b00010111;
-        result = boolean.boole; 
-        io_led[0] = b00001100;
-        io_led[1] = b00010111;
-        if (currentCounter == 26b1)
-            if (result == b00111111) state.d = state.XOR_TEST1;
-            else state.d = state.ERROR;
-       
-    state.XOR_TEST1: //Test case 13: 74 ^ 13 =71
-        test_case_counter.d = test_case_counter.q+1;
-        boolean.alufn = 0b010110; 
-        boolean.a = b01001010;
-        boolean.b = b00001101;
-        result = boolean.boole; 
-        io_led[0] = b01100100;
-        io_led[1] = b00011100;
-        if (currentCounter == 26b1)
-            if (result == b01000111) state.d = state.XOR_TEST2;
-            else state.d = state.ERROR;
-    state.XOR_TEST2: //Test case 14: 72 ^ 13 =69
-        boolean.alufn = 0b010110; 
-        boolean.a = b01001000;
-        boolean.b = b00001101;
-        result = boolean.boole; 
-        io_led[0] = b01001000;
-        io_led[1] = b00011100;
-        if (currentCounter == 26b1)
-            if (result == b01000101) state.d = state.A_TEST2;
-            else state.d = state.ERROR;
-       
-    state.A_TEST1: //Test case 15: 33=33
-        test_case_counter.d = test_case_counter.q+1;
-        boolean.alufn = b011010; 
-        boolean.a = b00100001;
-        boolean.b = b00010100;
-        result = boolean.boole; 
-        io_led[0] = b01100100;
-        io_led[1] = b00010100;
-        if (currentCounter == 26b1)
-            if (result == b00100001) state.d = state.A_TEST2;
-            else state.d = state.ERROR;
-    state.A_TEST2: //Test case 16: 20=20
-        boolean.alufn = 0b011010; 
-        boolean.a = b00100001;
-        boolean.b = b00010100;
-        result = boolean.boole; 
-        io_led[0] = b01100100;
-        io_led[1] = b00010100;
-        if (currentCounter == 26b1)
-            if (result == b00010100) state.d = state.B_TEST1;
-            else state.d = state.ERROR;
-       
-    state.B_TEST1: //Test case 17: 60=60
-        test_case_counter.d = test_case_counter.q+1;
-        boolean.alufn = 0b010101; 
-        boolean.a = b00100001;
-        boolean.b = b00101000;
-        result = boolean.boole; 
-        io_led[0] = b01100100;
-        io_led[1] = b00101000;
-        if (currentCounter == 26b1)
-            if (result == b00111100) state.d = state.B_TEST2;
-            else state.d = state.ERROR;
-    state.B_TEST2: //Test case 18: 40=40
-        boolean.alufn = 0b010101; 
-        boolean.a = b00100001;
-        boolean.b = b00101000;
-        result = boolean.boole; 
-        io_led[0] = b01100100;
-        io_led[1] = b00101000;
-        if (currentCounter == 26b1)
-            if (result == b00101000) state.d = state.NAND_TEST1;
-            else state.d = state.ERROR;
-       
-    state.NAND_TEST1: //Test case 19: 103   32  =-65
-        test_case_counter.d = test_case_counter.q+1;
-        boolean.alufn = b010111; 
-        boolean.a = b01100111;
-        boolean.b = b00011100;
-        result = boolean.boole; 
-        io_led[0] = b01100100;
-        io_led[1] = b00100000;
-        if (currentCounter == 26b1)
-            if (result == b01000001) state.d = state.NAND_TEST2;
-            else state.d = state.ERROR;
-    state.NAND_TEST2: //Test case 20: 103   32  =-65
-        boolean.alufn = 0b010111; 
-        boolean.a = b01100111;
-        boolean.b = b00011100;
-        result = boolean.boole; 
-        io_led[0] = b01100100;
-        io_led[1] = b00011100;
-        if (currentCounter == 26b1)
-            if (result == b01000001) state.d = state.NOR_TEST1;
-            else state.d = state.ERROR;
-       
-    state.NOR_TEST1: //Test case 21: 13    24 = -30
-        test_case_counter.d = test_case_counter.q+1;
-        boolean.alufn = 0b010001; 
-        boolean.a = b00001101;
-        boolean.b = b00011000;
-        result = boolean.boole; 
-        io_led[0] = b01100100;
-        io_led[1] = b00011100;
-        if (currentCounter == 26b1)
-            if (result == b00011110) state.d = state.NOR_TEST2;
-            else state.d = state.ERROR;
-    state.NOR_TEST2: //Test case 22: 13    24 = -30
-        boolean.alufn = 0b010001; 
-        boolean.a = b00001101;
-        boolean.b = b00011000;
-        result = boolean.boole; 
-        io_led[0] = b01100100;
-        io_led[1] = b00011100;
-        if (currentCounter == 26b1)
-            if (result == b00011110) state.d = state.XNOR_TEST1;
-            else state.d = state.ERROR;
-       
-
-      
-    }
+        state.CONSTM1_TEST1: //Test case 25: result = b11111111
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b011111; 
+            boolean.a = b01100100;
+            boolean.b = b00011100;
+            result = boolean.boole; 
+            io_led[0] = b01100100;
+            io_led[1] = b00011100;
+            if (currentCounter == 26b1)
+                if (result == b11111111) state.d = state.CONSTM1_TEST2;
+                else state.d = state.ERROR;
+        state.CONSTM1_TEST2: //Test case 26: result = b11111111
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b011111; 
+            boolean.a = b01111100;
+            boolean.b = b00000100;
+            result = boolean.boole; 
+            io_led[0] = b01111100;
+            io_led[1] = b00000100;
+            if (currentCounter == 26b1)
+                if (result == b11111111) state.d = state.CONST0_TEST1;
+                else state.d = state.ERROR;
     
+        state.CONST0_TEST1: //Test case 27: result = b00000000
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b010000; 
+            boolean.a = b01100100;
+            boolean.b = b00011100;
+            result = boolean.boole; 
+            io_led[0] = b01100100;
+            io_led[1] = b00011100;
+            if (currentCounter == 26b1)
+                if (result == b00000000) state.d = state.CONST0_TEST2;
+                else state.d = state.ERROR;
+        state.CONST0_TEST2: //Test case 28: result = b00000000
+            test_case_counter.d = test_case_counter.q+1;
+            boolean.alufn = b010000; 
+            boolean.a = b01111100;
+            boolean.b = b00000100;
+            result = boolean.boole; 
+            io_led[0] = b01111100;
+            io_led[1] = b00000100;
+            if (currentCounter == 26b1)
+                if (result == b00000000) state.d = state.SHL_TEST1;
+                else state.d = state.ERROR;
+    
+        state.SHL_TEST1: //Test case 29: 01100100 <<< 00000001 = 11001000
+            test_case_counter.d = test_case_counter.q+1;
+            shifter.alufn = b100000; 
+            shifter.a = b01100100;
+            shifter.b = b00000001;
+            result = shifter.shift; 
+            io_led[0] = b01100100;
+            io_led[1] = b00000001;
+            if (currentCounter == 26b1)
+                if (result == b11001000) state.d = state.SHL_TEST2;
+                else state.d = state.ERROR;
+        state.SHL_TEST2: //Test case 30: 01100100 <<< 00000010 = 10010000
+            test_case_counter.d = test_case_counter.q+1;
+            shifter.alufn = b100000; 
+            shifter.a = b01100100;
+            shifter.b = b00000010;
+            result = shifter.shift; 
+            io_led[0] = b01100100;
+            io_led[1] = b00000010;
+            if (currentCounter == 26b1)
+                if (result == b10010000) state.d = state.SHR_TEST1;
+                else state.d = state.ERROR;
+    
+        state.SHR_TEST1: //Test case 31: 01100100 >>> 00000001 = 00110010
+            test_case_counter.d = test_case_counter.q+1;
+            shifter.alufn = b100001; 
+            shifter.a = b01100100;
+            shifter.b = b00000001;
+            result = shifter.shift; 
+            io_led[0] = b01100100;
+            io_led[1] = b00000001;
+            if (currentCounter == 26b1)
+                if (result == b00110010) state.d = state.SHR_TEST2;
+                else state.d = state.ERROR;
+        state.SHR_TEST2: //Test case 32: 01100100 >>> 00000011 = 00001100
+            test_case_counter.d = test_case_counter.q+1;
+            shifter.alufn = b100001; 
+            shifter.a = b01100100;
+            shifter.b = b00000011;
+            result = shifter.shift; 
+            io_led[0] = b01100100;
+            io_led[1] = b00000011;
+            if (currentCounter == 26b1)
+                if (result == b00001100) state.d = state.SRA_TEST1;
+                else state.d = state.ERROR;
+    
+        state.SRA_TEST1: //Test case 33: 01100100 a>> 00000001 = 00110010
+            test_case_counter.d = test_case_counter.q+1;
+            shifter.alufn = b100011; 
+            shifter.a = b01100100;
+            shifter.b = b00000001;
+            result = shifter.shift; 
+            io_led[0] = b01100100;
+            io_led[1] = b00000001;
+            if (currentCounter == 26b1)
+                if (result == b00110010) state.d = state.SRA_TEST2;
+                else state.d = state.ERROR;
+        state.SRA_TEST2: //Test case 34: 11100100 a>> 00000011 = 11111100
+            test_case_counter.d = test_case_counter.q+1;
+            shifter.alufn = b100011; 
+            shifter.a = b11100100;
+            shifter.b = b00000011;
+            result = shifter.shift; 
+            io_led[0] = b11100100;
+            io_led[1] = b00000011;
+            if (currentCounter == 26b1)
+                if (result == b11111100) state.d = state.CMPEQ_TEST1;
+                else state.d = state.ERROR;
+    
+        state.CMPEQ_TEST1: //Test case 35: 10011001 - 10011001 = 00000000; z=1,v=0,n=0
+            test_case_counter.d = test_case_counter.q+1;
+            compare.alufn = b110011; 
+            compare.z = 1;
+            compare.v = 0;
+            compare.n = 0;
+            result = compare.cmp; 
+            io_led[0][0] = 1;
+            io_led[0][1] = 0;
+            io_led[0][2] = 0;
+            if (currentCounter == 26b1)
+                if (result == b00000001) state.d = state.CMPEQ_TEST2;
+                else state.d = state.ERROR;
+        state.CMPEQ_TEST2: //Test case 36: 10011001 - 10011000 = 00000001; z=0,v=0,n=0
+            test_case_counter.d = test_case_counter.q+1;
+            compare.alufn = b110011; 
+            compare.z = 0;
+            compare.v = 0;
+            compare.n = 0;
+            result = compare.cmp; 
+            io_led[0][0] = 0;
+            io_led[0][1] = 0;
+            io_led[0][2] = 0;
+            if (currentCounter == 26b1)
+                if (result == b00000000) state.d = state.CMPLT_TEST1;
+                else state.d = state.ERROR;
+    
+        state.CMPLT_TEST1: //Test case 37: 10011001 - 10011001 = 00000000; z=1,v=0,n=0
+            test_case_counter.d = test_case_counter.q+1;
+            compare.alufn = b110101; 
+            compare.z = 1;
+            compare.v = 0;
+            compare.n = 0;
+            result = compare.cmp; 
+            io_led[0][0] = 1;
+            io_led[0][1] = 0;
+            io_led[0][2] = 0;
+            if (currentCounter == 26b1)
+                if (result == b00000000) state.d = state.CMPLT_TEST2;
+                else state.d = state.ERROR;
+        state.CMPLT_TEST2: //Test case 38: 10011000 - 10011001 = 11111111; z=0,v=0,n=1
+            test_case_counter.d = test_case_counter.q+1;
+            compare.alufn = b110101; 
+            compare.z = 0;
+            compare.v = 0;
+            compare.n = 1;
+            result = compare.cmp; 
+            io_led[0][0] = 0;
+            io_led[0][1] = 0;
+            io_led[0][2] = 1;
+            if (currentCounter == 26b1)
+                if (result == b00000001) state.d = state.CMPLE_TEST1;
+                else state.d = state.ERROR;
+    
+        state.CMPLE_TEST1: //Test case 39: 10011001 - 10011001 = 00000000; z=1,v=0,n=0
+            test_case_counter.d = test_case_counter.q+1;
+            compare.alufn = b110111; 
+            compare.z = 1;
+            compare.v = 0;
+            compare.n = 0;
+            result = compare.cmp; 
+            io_led[0][0] = 1;
+            io_led[0][1] = 0;
+            io_led[0][2] = 0;
+            if (currentCounter == 26b1)
+                if (result == b00000001) state.d = state.CMPLE_TEST2;
+                else state.d = state.ERROR;
+        state.CMPLE_TEST2: //Test case 40: 10011000 - 10011001 = 11111111; z=0,v=0,n=1
+            test_case_counter.d = test_case_counter.q+1;
+            compare.alufn = b110111; 
+            compare.z = 1;
+            compare.v = 0;
+            compare.n = 0;
+            result = compare.cmp; 
+            io_led[0][0] = 1;
+            io_led[0][1] = 0;
+            io_led[0][2] = 0;
+            if (currentCounter == 26b1)
+                if (result == b00000001) state.d = state.CMPGT_TEST1;
+                else state.d = state.ERROR;
+    
+        state.CMPGT_TEST1: //Test case 41: 10011001 - 10011001 = 00000000; z=1,v=0,n=0
+            test_case_counter.d = test_case_counter.q+1;
+            compare.alufn = b111001; 
+            compare.z = 1;
+            compare.v = 0;
+            compare.n = 0;
+            result = compare.cmp; 
+            io_led[0][0] = 1;
+            io_led[0][1] = 0;
+            io_led[0][2] = 0;
+            if (currentCounter == 26b1)
+                if (result == b00000001) state.d = state.CMPGT_TEST2;
+                else state.d = state.ERROR;
+        state.CMPGT_TEST2: //Test case 42: 10011011 - 10011001 = 00000010; z=0,v=0,n=0
+            test_case_counter.d = test_case_counter.q+1;
+            compare.alufn = b111001; 
+            compare.z = 0;
+            compare.v = 0;
+            compare.n = 0;
+            result = compare.cmp; 
+            io_led[0][0] = 0;
+            io_led[0][1] = 0;
+            io_led[0][2] = 0;
+            if (currentCounter == 26b1)
+                if (result == b00000001) state.d = state.CMPGE_TEST1;
+                else state.d = state.ERROR;
+    
+        state.CMPGE_TEST1: //Test case 43: 10011001 - 10011001 = 00000000; z=1,v=0,n=0
+            test_case_counter.d = test_case_counter.q+1;
+            compare.alufn = b111011; 
+            compare.z = 1;
+            compare.v = 0;
+            compare.n = 0;
+            result = compare.cmp; 
+            io_led[0][0] = 1;
+            io_led[0][1] = 0;
+            io_led[0][2] = 0;
+            if (currentCounter == 26b1)
+                if (result == b00000001) state.d = state.CMPGE_TEST2;
+                else state.d = state.ERROR;
+        state.CMPGE_TEST2: //Test case 44: 10011000 - 10011001 = 11111111; z=0,v=0,n=1
+            test_case_counter.d = test_case_counter.q+1;
+            compare.alufn = b111011; 
+            compare.z = 0;
+            compare.v = 0;
+            compare.n = 1;
+            result = compare.cmp; 
+            io_led[0][0] = 0;
+            io_led[0][1] = 0;
+            io_led[0][2] = 1;
+            if (currentCounter == 26b1)
+                if (result == b00000000) state.d = state.END;
+                else state.d = state.ERROR;
+        }
