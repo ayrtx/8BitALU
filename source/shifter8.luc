@@ -1,20 +1,20 @@
 module shifter8 (
-    input alufn[6],
-    input a[8],
-    input b[8],
-    output shift[8])
+    input alufn[6],       //input of alufn
+    input a[8],           //input of a
+    input b[8],           //input of b
+    output shift[8])      //output of shift
 {
   // Module to shift a by b bits. 
   always {
     case (alufn[1:0]){
       b00:
-        shift = a <<< b[2:0];
+        shift = a <<< b[2:0];            //shift a to left by decimal value of b[2:0] bits
       b01:
-        shift = a >>> b[2:0];
+        shift = a >>> b[2:0];            //shift a to right by decimal value of b[2:0] bits
       b11:
-        shift = $signed(a) >>> b[2:0];
+        shift = $signed(a) >>> b[2:0];   //shift a to right by decimal value of b[2:0] bits and replace vacant bits with initial value of most significant bit
       default:
-        shift = a;
+        shift = a;                       //default output of shift is a
     }  
   }
 }
