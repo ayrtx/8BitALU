@@ -1,23 +1,23 @@
 module seven_seg (
-    input char[4],
-    output segs[7]
+    input char[4],                   //input of char
+    output segs[7]                   //output of one 7-segment LED digit
   ) {
  
   always {
     case (char) {
-      0: segs = 7b0111111;
-      1: segs = 7b0000110;
-      2: segs = 7b1011011;
-      3: segs = 7b1001111;
-      4: segs = 7b1100110;
-      5: segs = 7b1101101;
-      6: segs = 7b1111101;
-      7: segs = 7b0000111;
-      8: segs = 7b1111111;
-      9: segs = 7b1100111;
-      14: segs = 7b0000000;
-      15: segs = 7b1000000;
-      default: segs = 7b0000000;
+      0: segs = 7b0111111;            //if input value ==0, displays 0 on 7 segment LED Display
+      1: segs = 7b0000110;            //if input value ==1, displays 1 on 7 segment LED Display            
+      2: segs = 7b1011011;            //if input value ==2, displays 2 on 7 segment LED Display
+      3: segs = 7b1001111;            //if input value ==3, displays 3 on 7 segment LED Display
+      4: segs = 7b1100110;            //if input value ==4, displays 4 on 7 segment LED Display
+      5: segs = 7b1101101;            //if input value ==5, displays 5 on 7 segment LED Display
+      6: segs = 7b1111101;            //if input value ==6, displays 6 on 7 segment LED Display
+      7: segs = 7b0000111;            //if input value ==7, displays 7 on 7 segment LED Display
+      8: segs = 7b1111111;            //if input value ==8, displays 8 on 7 segment LED Display
+      9: segs = 7b1100111;            //if input value ==9, displays 9 on 7 segment LED Display
+      14: segs = 7b0000000;           //Used to show if a number is positive, by not displaying any thing on the left most 7 segment LED display
+      15: segs = 7b1000000;           //Used to show if a number is negative, by displaying a negative sign on the left most 7 segment LED display
+      default: segs = 7b0000000;      //Does not display anything as a default 
     }
   }
 }
