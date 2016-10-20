@@ -4,6 +4,7 @@ module shifter8 (
     input b[8],
     output shift[8])
 {
+  sig shiftTemp[8];
   // Module to shift a by b bits. 
   always {
     case (alufn[1:0]){
@@ -12,7 +13,17 @@ module shifter8 (
       b01:
         shift = a >>> b[2:0];
       b11:
-        shift = $signed(a) >>> b[2:0];
+        shiftTemp = a >>> b[2:0];
+        if (b[2:0] != c{0,0,0}){
+          case(shiftTemp[7]){
+            b0: 
+            shiftTemp[7:8-b[2:0]] = 1;
+            shift = shiftTemp;
+          }
+        }
+        else{
+        shift = shiftTemp;
+        }
       default:
         shift = a;
     }  

@@ -10,9 +10,9 @@ module adder (
   always {
     sum = 0;
       case(alufn[1:0]){
-        00:
+        b00:
           sum = a + b;
-        01:
+        b01:
           sum = a - b;  
     } 
   }

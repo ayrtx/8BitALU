@@ -1,4 +1,4 @@
-module boole8 (
+module boolean (
     input alufn[6],   
     input a[8],
     input b[8],
@@ -6,11 +6,14 @@ module boole8 (
   ) {
   
   var i;
+  var n;
   sig temp[8];
   always {
     temp=b0;
     for (i = 0; i < 8; i++) {
-      case(alufn[1:0]) {
+
+      n = (a[i] *2) + b[i];      //n is selector for every bit wise operation
+      case(n) {
         b00:
           temp [i] = alufn[0];   //if n=00, output=boolean=ALUFN[0]
         b01:

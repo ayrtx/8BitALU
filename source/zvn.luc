@@ -1,5 +1,4 @@
 module zvn (
-    input sum[8],
     input alufn[6],
     input a[8],
     input b[8],
@@ -8,16 +7,15 @@ module zvn (
     output n
     
   ) {
+  sig sum[8];
 
   always {
+    sum = a - b;
     if (sum == 0){
       z = 1;}
     else{
       z = 0;}
-    if (sum[7] == 1){
-      n = 1;}
-    else{
-      n = 0;}
+    n = sum[7];
     v = (a[7] & (b[7] ^ alufn[0]) & ~sum[7]) | (~a[7] & ~(b[7] ^ alufn[0]) & sum[7]);
   }
 }
