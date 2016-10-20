@@ -1,18 +1,18 @@
 module mult (
-    input a[8],
-    input b[8],
-    input alufn[6],
-    output multiplied[8]
+    input a[8],           //input of a
+    input b[8],           //input of b
+    input alufn[6],       //input of alufn
+    output multiplied[8]  //output of multiplied
   ) {
 
   always {
-      multiplied = 0;
-      case(alufn[1:0]){
+      multiplied = 0;     //initilising multiplied to 0
+      case(alufn[1:0]){     
         b10:
-          multiplied = a * b;
+          multiplied = a * b;        //multiplication of a and b;
         b11:
-          if (a[7] == 0) multiplied = a;
-          else multiplied = a * b11111111;
+          if (a[7] == 0) multiplied = a;       //return a if a>=0
+          else multiplied = a * b11111111;     //return absolute of a if a<0
       }
   }
 }
