@@ -187,7 +187,7 @@ module mojo_top (
             //  invalid = 2;}
         b010110: 
           invalid = 0;
-          result = boolean.boole;
+          result = boolean.boole + 1;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q^fb.q) {
               state.d = state.ERROR;     
           }
