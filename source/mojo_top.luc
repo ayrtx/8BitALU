@@ -12,8 +12,8 @@ module mojo_top (
     //output avr_rx,          // AVR RX (FPGA TX)
     input avr_rx_busy,      // AVR RX buffer full
     output io_led [1][8],   // LEDs on IO Shield
-    //output io_seg [8],      // 7-segment LEDs on IO Shield
-    //output io_sel [4],      // Digit select on IO Shield
+    output io_seg [8],      // 7-segment LEDs on IO Shield
+    output io_sel [4],      // Digit select on IO Shield
     //input io_button [5],    // 5 buttons on IO Shield
     input io_dip [3][8]     // DIP switches on IO Shield
   ) {
@@ -27,7 +27,7 @@ module mojo_top (
     // The reset conditioner is used to synchronize the reset signal to the FPGA
     // clock. This ensures the entire FPGA comes out of reset at the same time.
     reset_conditioner reset_cond;
-    //.rst(rst) {multi_seven_seg seg;}
+    .rst(rst) {multi_seven_seg seg;}
     //fsm state = {ADDER, COMPARE, BOOLEAN, SHR, SHL, SHA}; 
   }
   
@@ -37,7 +37,7 @@ module mojo_top (
   shifter8 shifter;
   compare8 compare;
   boolean boolean;
-  //bin_to_dec binDec;
+  bin_to_dec binDec;
   
   always {
   reset_cond.in = ~rst_n; // input raw inverted reset signal
@@ -69,10 +69,6 @@ module mojo_top (
   boolean.alufn=io_dip[2][5:0];
   boolean.a = io_dip[1];
   boolean.b = io_dip[0];
-    
-  //seg.values = {4h0,4h0,4h0,4h0};
-  //io_seg = ~seg.seg; // connect segments to the driver
-  //io_sel = ~seg.sel; // connect digit select to the driver  
 
   result = 0;
     
@@ -149,6 +145,7 @@ module mojo_top (
       b111011: 
         io_led[0] = compare.cmp;
         result = compare.cmp;
-      }        
+      }
+      
   }
 }
