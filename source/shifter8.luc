@@ -4,29 +4,25 @@ module shifter8 (
     input b[8],
     output shift[8])
 {
-  sig temp[8];
+  sig shiftTemp[8];
   // Module to shift a by b bits. 
   always {
-    case (alufn[2:0]){
-      b000:
+    case (alufn[1:0]){
+      b00:
         shift = a <<< b[2:0];
-      b001:
+      b01:
         shift = a >>> b[2:0];
-      b011:
-        shift = $signed(a) >>> b[2:0];
-      b100: // rotate left
-        if (b[2:0] == 0) shift = a;
-        else {
-          temp[7:b[2:0]] = a[7-b[2:0]:0];
-          temp[b[2:0]-1:0] = a[7:8-b[2:0]];
-          shift = temp;
+      b11:
+        shiftTemp = a >>> b[2:0];
+        if (b[2:0] != c{0,0,0}){
+          case(shiftTemp[7]){
+            b0: 
+            shiftTemp[7:8-b[2:0]] = 1;
+            shift = shiftTemp;
+          }
         }
-      b101: // rotate right
-        if (b[2:0] == 0) shift = a;
-        else {
-          temp[7:8-b[2:0]] = a[b[2:0]-1:0];
-          temp[7-b[2:0]:0] = a[7:b[2:0]];
-          shift = temp;
+        else{
+        shift = shiftTemp;
         }
       default:
         shift = a;
