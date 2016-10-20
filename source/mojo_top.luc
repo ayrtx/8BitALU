@@ -85,7 +85,7 @@ module mojo_top (
       //010111: NAND
       //010001: NOR
       //011001: XNOR
-      //011111: CONST1
+      //011111: CONSTM1
       //010000: CONST0
       100000: io_led[0] = shifter.shift;
       100001: io_led[0] = shifter.shift;
