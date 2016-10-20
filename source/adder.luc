@@ -11,7 +11,8 @@ module adder (
     sum = 0;
       case(alufn[1:0]){
         b00:
-          sum = a + b;
+          sum = a + b; //summation of a and b
+          
         b01:
           sum = a - b;  
     } 
