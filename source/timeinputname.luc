@@ -1,0 +1,14 @@
+module timeinputname ( 
+     input clk,    // clock 
+     input rst,    // reset 
+     output currentCounter [26]  // declares an output currentCounter with 26 bits 
+  ) { 
+ 
+   dff counter[26](.clk(clk), .rst(rst));  
+   // Instantiation of D-type flip-flops of 26 bits 
+   // Starts with the default value of 0 and resets to the default value of 0 
+    always { 
+    currentCounter = counter.q; // Assign the current value of counter to currentCounter 
+    counter.d = counter.q + 1; // Adds 1 to the value of counter at each positive edge of clk 
+  } 
+ } 
