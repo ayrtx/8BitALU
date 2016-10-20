@@ -15,9 +15,9 @@ module boolean (
       n = (a[i] *2) + b[i];      //n is selector for every bit wise operation
       case(n) {
         b00:
-          temp [i] = alufn[0];   //if n=00, output=boolean=ALUFN[0]
+          temp[i] = alufn[0];   //if n=00, output=boolean=ALUFN[0]
         b01:
-           temp[i] = alufn[1];   //if n=01, output=boolean=ALUFN[1]
+          temp[i] = alufn[1];   //if n=01, output=boolean=ALUFN[1]
         b10:
           temp[i] = alufn[2];   //if n=10, output=boolean=ALUFN[2]
         b11:

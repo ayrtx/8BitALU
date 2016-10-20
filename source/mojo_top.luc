@@ -1,7 +1,7 @@
 module mojo_top (
     input clk,              // 50MHz clock
     input rst_n,            // reset button (active low)
-    //output led [8],         // 8 user controllable LEDs
+    output led [8],         // 8 user controllable LEDs
     input cclk,             // configuration clock, AVR ready when high
     //output spi_miso,        // AVR SPI MISO
     input spi_ss,           // AVR SPI Slave Select
@@ -11,15 +11,16 @@ module mojo_top (
     input avr_tx,           // AVR TX (FPGA RX)
     //output avr_rx,          // AVR RX (FPGA TX)
     input avr_rx_busy,      // AVR RX buffer full
-    output io_led [2][8],   // LEDs on IO Shield
-    output io_seg [8],      // 7-segment LEDs on IO Shield
-    output io_sel [4],      // Digit select on IO Shield
+    output io_led [3][8],   // LEDs on IO Shield
+    //output io_seg [8],      // 7-segment LEDs on IO Shield
+    //output io_sel [4],      // Digit select on IO Shield
     //input io_button [5],    // 5 buttons on IO Shield
     input io_dip [3][8]     // DIP switches on IO Shield
   ) {
   
   
   sig rst;                  // reset signal
+  sig mode;
   sig result[8];
   
   
@@ -28,8 +29,15 @@ module mojo_top (
     // clock. This ensures the entire FPGA comes out of reset at the same time.
     reset_conditioner reset_cond;
     .rst(rst) {
-    multi_seven_seg seg;}
-    //fsm state = {ADDER, COMPARE, BOOLEAN, SHR, SHL, SHA}; 
+        timeinputname changeState;
+        dff test_case_counter[8];
+        dff falufn[6];
+        dff fa[8];
+        dff fb[8];
+        //multi_seven_seg seg;
+        //fsm state(.clk(clk), #INIT(RESET)) = {RESET, ADD_TEST1, ADD_TEST2, SUB_TEST1, SUB_TEST2, MULT_TEST1, MULT_TEST2, ABS_TEST1, ABS_TEST2, AND_TEST1, AND_TEST2, OR_TEST1, OR_TEST2, XOR_TEST1, XOR_TEST2, A_TEST1, A_TEST2, B_TEST1, B_TEST2, NAND_TEST1, NAND_TEST2, NOR_TEST1, NOR_TEST2, XNOR_TEST1, XNOR_TEST2, CONSTM1_TEST1, CONSTM1_TEST2, CONST0_TEST1, CONST0_TEST2, SHL_TEST1, SHL_TEST2, SHR_TEST1, SHR_TEST2, SRA_TEST1, SRA_TEST2, CMPEQ_TEST1, CMPEQ_TEST2, CMPLT_TEST1, CMPLT_TEST2, CMPLE_TEST1, CMPLE_TEST2, CMPGT_TEST1, CMPGT_TEST2, CMPGE_TEST1, CMPGE_TEST2, ERROR, END};
+        fsm state(.clk(clk), #INIT(START)) = {START, TESTING, ERROR};
+    }
   }
   
   adder adder;
@@ -38,130 +46,193 @@ module mojo_top (
   shifter8 shifter;
   compare8 compare;
   boolean boolean;
-  bin_to_dec binDec;
+  //bin_to_dec binDec;
   
   always {
   reset_cond.in = ~rst_n; // input raw inverted reset signal
   rst = reset_cond.out;   // conditioned reset 
     
   io_led[0] = c{0,0,0,0,0,0,0,0};
-  binDec.value = c{0,0,0,0,0,0,0,0};
-    
-  adder.alufn=io_dip[2][5:0];
-  adder.a = io_dip[1];
-  adder.b = io_dip[0];
-    
-  zvn.a = io_dip[1];
-  zvn.b = io_dip[0];
-  zvn.alufn = io_dip[2][5:0];
+  //binDec.value = c{0,0,0,0,0,0,0,0};
   
-  mult.a = io_dip[1];
-  mult.b = io_dip[0];
-  mult.alufn = io_dip[2][5:0];
-  
-  shifter.alufn=io_dip[2][5:0];
-  shifter.a = io_dip[1];
-  shifter.b = io_dip[0];
-  
-  compare.alufn=io_dip[2][5:0];
-  compare.z = zvn.z;
-  compare.v = zvn.v;
-  compare.n = zvn.n;
-  
-  boolean.alufn=io_dip[2][5:0];
-  boolean.a = io_dip[1];
-  boolean.b = io_dip[0];
-    
-  //seg.values = {4h0,4h0,4h0,4h0};
-  //io_seg = ~seg.seg; // connect segments to the driver
-  //io_sel = ~seg.sel; // connect digit select to the driver  
-
-  result = 0;
-    
-  case(io_dip[2][5:0]){
+      adder.alufn=io_dip[2][5:0];
+      adder.a = io_dip[1];
+      adder.b = io_dip[0];
+        
+      zvn.a = io_dip[1];
+      zvn.b = io_dip[0];
+      zvn.alufn = io_dip[2][5:0];
       
-      b000000: 
-        io_led[1] = adder.sum;
-        result = adder.sum;
-      b000001: 
-        io_led[1] = adder.sum;
-        result = adder.sum;
-      b000010: 
-        io_led[1] = mult.multiplied;
-        result = mult.multiplied;
-      b000011: 
-        io_led[1] = mult.multiplied;
-        result = mult.multiplied;
-      b011000: 
-        io_led[1] = boolean.boole;
-        result = boolean.boole;
-      b011110: 
-        io_led[1] = boolean.boole;
-        result = boolean.boole;
-      b010110: 
-        io_led[1] = boolean.boole;
-        result = boolean.boole;
-      b011010: 
-        io_led[1] = boolean.boole;
-        result = boolean.boole;
-      b010101: 
-        io_led[1] = boolean.boole;
-        result = boolean.boole;
-      b010111: 
-        io_led[1] = boolean.boole;
-        result = boolean.boole;
-      b010001: 
-        io_led[1] = boolean.boole;
-        result = boolean.boole;
-      b011001: 
-        io_led[1] = boolean.boole;
-        result = boolean.boole;
-      b011111: 
-        io_led[1] = boolean.boole;
-        result = boolean.boole;
-      b010000: 
-        io_led[1] = boolean.boole;
-        result = boolean.boole;
-      b100000: 
-        io_led[1] = shifter.shift;
-        result = shifter.shift;
-      b100001: 
-        io_led[1] = shifter.shift;
-        result = shifter.shift;
-      b100011: 
-        io_led[1] = shifter.shift;
-        result = shifter.shift;
-      b100100: 
-        io_led[1] = shifter.shift;
-        result = shifter.shift;
-      b100101: 
-        io_led[1] = shifter.shift;
-        result = shifter.shift;
-      b110011: 
-        io_led[1] = compare.cmp;
-        result = compare.cmp;
-      b110101: 
-        io_led[1] = compare.cmp;
-        result = compare.cmp;
-      b110111: 
-        io_led[1] = compare.cmp;
-        result = compare.cmp;
-      b111001: 
-        io_led[1] = compare.cmp;
-        result = compare.cmp;
-      b111011: 
-        io_led[1] = compare.cmp;
-        result = compare.cmp;
+      mult.a = io_dip[1];
+      mult.b = io_dip[0];
+      mult.alufn = io_dip[2][5:0];
+      
+      shifter.alufn=io_dip[2][5:0];
+      shifter.a = io_dip[1];
+      shifter.b = io_dip[0];
+      
+      compare.alufn=io_dip[2][5:0];
+      compare.z = zvn.z;
+      compare.v = zvn.v;
+      compare.n = zvn.n;
+      
+      boolean.alufn=io_dip[2][5:0];
+      boolean.a = io_dip[1];
+      boolean.b = io_dip[0];
+      
+      result = 0;
+      io_led[0] = 0;
+      io_led[1] = 0;
+
+  mode = io_dip[2][7];
+      
+  case(mode) {
+    b0:
+      if (state.q == state.START) {
+        falufn.d = io_dip[2][5:0];
+        fa.d = io_dip[0];
+        fb.d = io_dip[1];
       }
-  if (result[7] == 1){
-          binDec.value = 128 - result[6:0];
-          seg.values = {c{1,1,1,1},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
+      if (state.q == state.TESTING) {
+        state.d = state.START;
+      }
+    b1:
+      if (state.q == state.START) {
+        falufn.d = b010000;
+        fa.d = 0;
+        fb.d = 0;
+        state.d = state.TESTING;
+      }
+      
+      adder.alufn=falufn.q;
+      adder.a = fa.q;
+      adder.b = fb.q;
+        
+      zvn.a = fa.q;
+      zvn.b = fb.q;
+      zvn.alufn=falufn.q;
+      
+      mult.a = fa.q;
+      mult.b = fb.q;
+      mult.alufn=falufn.q;
+      
+      shifter.alufn=falufn.q;
+      shifter.a = fa.q;
+      shifter.b = fb.q;
+      
+      compare.alufn=falufn.q;
+      compare.z = zvn.z;
+      compare.v = zvn.v;
+      compare.n = zvn.n;
+      
+      boolean.alufn=falufn.q;
+      boolean.a = fa.q;
+      boolean.b = fb.q;
+      
+      if (changeState.currentCounter == 26b1 && state.q == state.TESTING) {
+        fb.d = fb.q+1;
+        if (fb.q == b00000001) {
+          fb.d = 0;
+          fa.d = fa.q+1;
+          if (fa.q == b00000001) {
+            fa.d = 0;
+            falufn.d = falufn.q+1;
           }
-  else{
-      binDec.value = result[6:0];
-      seg.values = {c{1,1,1,0},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
+        }
       }
-      io_seg = ~seg.seg; // connect segments to the driver
-      io_sel = ~seg.sel; // connect digit select to the driver       
+    }
+    
+      case(falufn.q){
+        b000000: 
+          result = adder.sum;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q+fb.q) state.d = state.ERROR;
+        b000001: 
+          result = adder.sum;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q-fb.q) state.d = state.ERROR;
+        b000010: 
+          result = mult.multiplied;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q*fb.q) state.d = state.ERROR;
+        b000011: 
+          result = mult.multiplied;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q*8b1) state.d = state.ERROR;
+        b011000: 
+          result = boolean.boole;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q&fb.q) state.d = state.ERROR;
+        b011110: 
+          result = boolean.boole;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q|fb.q) state.d = state.ERROR;
+        b010110: 
+          result = boolean.boole;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q^fb.q) state.d = state.ERROR;
+        b011010: 
+          result = boolean.boole;
+        //  if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q) state.d = state.ERROR;
+        b011100: 
+          result = boolean.boole;
+        //  if (mode == b1 && changeState.currentCounter == 26b1 && result != fb.q) state.d = state.ERROR;
+        b010101: 
+          result = boolean.boole;
+        //  if (mode == b1 && changeState.currentCounter == 26b1 && result != ~(fa.q&fa.q)) state.d = state.ERROR;
+        b010011: 
+          result = boolean.boole;
+        //  if (mode == b1 && changeState.currentCounter == 26b1 && result != ~(fb.q&fb.q)) state.d = state.ERROR;
+        b010111: 
+          result = boolean.boole;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != ~(fa.q&fb.q)) state.d = state.ERROR;
+        b010001: 
+          result = boolean.boole;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != ~(fa.q|fb.q)) state.d = state.ERROR;
+        b011001: 
+          result = boolean.boole;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != ~(fa.q^fb.q)) state.d = state.ERROR;
+        b011111: 
+          result = boolean.boole;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != 8b1) state.d = state.ERROR;
+        b010000: 
+          result = boolean.boole;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != 8b0) state.d = state.ERROR;
+        b100000: 
+          result = shifter.shift;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q<<<fb.q[2:0]) state.d = state.ERROR;
+        b100001: 
+          result = shifter.shift;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q>>>fb.q[2:0]) state.d = state.ERROR;
+        b100011: 
+          result = shifter.shift;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != $signed(fa.q)>>>fb.q[2:0]) state.d = state.ERROR;
+        b110011: 
+          result = compare.cmp;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != (fa.q==fb.q)) state.d = state.ERROR;
+        b110101: 
+          result = compare.cmp;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != (fa.q<fb.q)) state.d = state.ERROR;
+        b110111: 
+          result = compare.cmp;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != (fa.q<=fb.q)) state.d = state.ERROR;
+        b111001: 
+          result = compare.cmp;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != (fa.q>fb.q)) state.d = state.ERROR;
+        b111011: 
+          result = compare.cmp;
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != (fa.q>=fb.q)) state.d = state.ERROR;
+        default:
+          result = 0;
+        }
+      
+    led = 0;
+    led[5:0] = falufn.q;
+    io_led[0] = fa.q;
+    io_led[1] = fb.q;
+    io_led[2] = result;
+    //if (result[7] == 1){
+    //  binDec.value = 128 - result[6:0];
+    //  seg.values = {c{1,1,1,1},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
+    //}
+    //else{
+    //  binDec.value = result[6:0];
+    //  seg.values = {c{1,1,1,0},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
+    //}
+    //io_seg = ~seg.seg; // connect segments to the driver
+    //io_sel = ~seg.sel; // connect digit select to the driver       
   }
 }

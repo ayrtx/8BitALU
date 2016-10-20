@@ -11,7 +11,7 @@ module mojo_top (
     input avr_tx,           // AVR TX (FPGA RX)
     //output avr_rx,          // AVR RX (FPGA TX)
     input avr_rx_busy,      // AVR RX buffer full
-    output io_led [1][8],   // LEDs on IO Shield
+    output io_led [2][8],   // LEDs on IO Shield
     output io_seg [8],      // 7-segment LEDs on IO Shield
     output io_sel [4],      // Digit select on IO Shield
     //input io_button [5],    // 5 buttons on IO Shield
@@ -20,33 +20,31 @@ module mojo_top (
   
   
   sig rst;                  // reset signal
-  //sig result[8];
+  sig result[8];
   
   
   .clk(clk) {
-  // The reset conditioner is used to synchronize the reset signal to the FPGA
-  // clock. This ensures the entire FPGA comes out of reset at the same time.
-  reset_conditioner reset_cond;
- 
-  .rst(rst) {
-    multi_seven_seg seg;
+    // The reset conditioner is used to synchronize the reset signal to the FPGA
+    // clock. This ensures the entire FPGA comes out of reset at the same time.
+    reset_conditioner reset_cond;
+    .rst(rst) {
+    multi_seven_seg seg;}
+    //fsm state = {ADDER, COMPARE, BOOLEAN, SHR, SHL, SHA}; 
   }
-}
-
+  
   adder adder;
   zvn zvn;
   mult mult;
   shifter8 shifter;
-  bin_to_dec binDec;
-  boole8 boole;
   compare8 compare;
+  boolean boolean;
+  bin_to_dec binDec;
   
   always {
   reset_cond.in = ~rst_n; // input raw inverted reset signal
   rst = reset_cond.out;   // conditioned reset 
     
-  io_led[0] = 0;
-    
+  io_led[0] = c{0,0,0,0,0,0,0,0};
   binDec.value = c{0,0,0,0,0,0,0,0};
     
   adder.alufn=io_dip[2][5:0];
@@ -55,126 +53,115 @@ module mojo_top (
     
   zvn.a = io_dip[1];
   zvn.b = io_dip[0];
-  zvn.sum = adder.sum;
   zvn.alufn = io_dip[2][5:0];
   
   mult.a = io_dip[1];
   mult.b = io_dip[0];
+  mult.alufn = io_dip[2][5:0];
   
   shifter.alufn=io_dip[2][5:0];
   shifter.a = io_dip[1];
   shifter.b = io_dip[0];
-    
-  boole.alufn=io_dip[2][5:0];
-  boole.a = io_dip[1];
-  boole.b = io_dip[0];
   
   compare.alufn=io_dip[2][5:0];
   compare.z = zvn.z;
   compare.v = zvn.v;
   compare.n = zvn.n;
-    
-  seg.values = {4h0,4h0,4h0,4h0};
-  io_seg = ~seg.seg; // connect segments to the driver
-  io_sel = ~seg.sel; // connect digit select to the driver  
   
-  case(io_dip[2][7]){
-    b0:  
-    case(io_dip[2][5:0]){
-        b000000: 
-        io_led[0] = adder.sum;
-        
-        if (adder.sum[7] == 1){
-          binDec.value = 128 - adder.sum[6:0];
-          seg.values = {c{1,1,1,1},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
-          }
-        else{
-          binDec.value = adder.sum[6:0];
-          seg.values = {c{1,1,1,0},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
-          }
-        io_seg = ~seg.seg; // connect segments to the driver
-        io_sel = ~seg.sel; // connect digit select to the driver}
-        
-        b000001: 
-        io_led[0] = adder.sum;
-        binDec.value = adder.sum[6:0];
-        if (adder.sum[7] == 1){
-          seg.values = {c{1,1,1,1},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
-          }
-        else{
-          seg.values = {c{1,1,1,0},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
-          }
-        io_seg = ~seg.seg; // connect segments to the driver
-        io_sel = ~seg.sel; // connect digit select to the driver
-  
-        b000010: 
-        io_led[0] = mult.multiplied;
-        binDec.value = mult.multiplied[6:0];
-        if (mult.multiplied[7] == 1){
-          seg.values = {c{1,1,1,1},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
-          }
-        else{
-          seg.values = {c{1,1,1,0},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
-          }
-        io_seg = ~seg.seg; // connect segments to the driver
-        io_sel = ~seg.sel; // connect digit select to the driver
-          
-        //011000: AND
-        //011110: OR
-        //010110: XOR
-        //011010: "A" LDR
-      //010101: "B"
-      //010111: NAND
-      //010001: NOR
-      //011001: XNOR
-      //011111: CONSTM1
-      //010000: CONST0
-        b100000: 
-        io_led[0] = shifter.shift;
-        binDec.value = shifter.shift[6:0];
-        if (shifter.shift[7] == 1){
-          seg.values = {c{1,1,1,1},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
-          }
-        else{
-          seg.values = {c{1,1,1,0},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
-          }
-        io_seg = ~seg.seg; // connect segments to the driver
-        io_sel = ~seg.sel; // connect digit select to the driver
-          
-        b100001: io_led[0] = shifter.shift;
-        io_led[0] = shifter.shift;
-        binDec.value = shifter.shift[6:0];
-        if (shifter.shift[7] == 1){
-          seg.values = {c{1,1,1,1},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
-          }
-        else{
-          seg.values = {c{1,1,1,0},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
-          }
-        io_seg = ~seg.seg; // connect segments to the driver
-        io_sel = ~seg.sel; // connect digit select to the driver
-        
-        b100011: io_led[0] = shifter.shift;
-        io_led[0] = shifter.shift;
-        binDec.value = shifter.shift[6:0];
-        if (shifter.shift[7] == 1){
-          seg.values = {c{1,1,1,1},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
-          }
-        else{
-          seg.values = {c{1,1,1,0},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
-          }
-        io_seg = ~seg.seg; // connect segments to the driver
-        io_sel = ~seg.sel; // connect digit select to the driver
-          
-      100100: io_led[0] = shifter.shift;
-      100101: io_led[0] = shifter.shift;
-      110011: io_led[0] = compare.cmp;
-      110101: io_led[0] = compare.cmp;
-      110111: io_led[0] = compare.cmp;
-      111001: io_led[0] = compare.cmp;
-      111011: io_led[0] = compare.cmp;
-        }
+  boolean.alufn=io_dip[2][5:0];
+  boolean.a = io_dip[1];
+  boolean.b = io_dip[0];
     
+  //seg.values = {4h0,4h0,4h0,4h0};
+  //io_seg = ~seg.seg; // connect segments to the driver
+  //io_sel = ~seg.sel; // connect digit select to the driver  
+
+  result = 0;
     
-    }
-  }    
+  case(io_dip[2][5:0]){
+      
+      b000000: 
+        io_led[1] = adder.sum;
+        result = adder.sum;
+      b000001: 
+        io_led[1] = adder.sum;
+        result = adder.sum;
+      b000010: 
+        io_led[1] = mult.multiplied;
+        result = mult.multiplied;
+      b000011: 
+        io_led[1] = mult.multiplied;
+        result = mult.multiplied;
+      b011000: 
+        io_led[1] = boolean.boole;
+        result = boolean.boole;
+      b011110: 
+        io_led[1] = boolean.boole;
+        result = boolean.boole;
+      b010110: 
+        io_led[1] = boolean.boole;
+        result = boolean.boole;
+      b011010: 
+        io_led[1] = boolean.boole;
+        result = boolean.boole;
+      b010101: 
+        io_led[1] = boolean.boole;
+        result = boolean.boole;
+      b010111: 
+        io_led[1] = boolean.boole;
+        result = boolean.boole;
+      b010001: 
+        io_led[1] = boolean.boole;
+        result = boolean.boole;
+      b011001: 
+        io_led[1] = boolean.boole;
+        result = boolean.boole;
+      b011111: 
+        io_led[1] = boolean.boole;
+        result = boolean.boole;
+      b010000: 
+        io_led[1] = boolean.boole;
+        result = boolean.boole;
+      b100000: 
+        io_led[1] = shifter.shift;
+        result = shifter.shift;
+      b100001: 
+        io_led[1] = shifter.shift;
+        result = shifter.shift;
+      b100011: 
+        io_led[1] = shifter.shift;
+        result = shifter.shift;
+      b100100: 
+        io_led[1] = shifter.shift;
+        result = shifter.shift;
+      b100101: 
+        io_led[1] = shifter.shift;
+        result = shifter.shift;
+      b110011: 
+        io_led[1] = compare.cmp;
+        result = compare.cmp;
+      b110101: 
+        io_led[1] = compare.cmp;
+        result = compare.cmp;
+      b110111: 
+        io_led[1] = compare.cmp;
+        result = compare.cmp;
+      b111001: 
+        io_led[1] = compare.cmp;
+        result = compare.cmp;
+      b111011: 
+        io_led[1] = compare.cmp;
+        result = compare.cmp;
+      }
+  if (result[7] == 1){
+          binDec.value = 128 - result[6:0];
+          seg.values = {c{1,1,1,1},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
+          }
+  else{
+      binDec.value = result[6:0];
+      seg.values = {c{1,1,1,0},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
+      }
+      io_seg = ~seg.seg; // connect segments to the driver
+      io_sel = ~seg.sel; // connect digit select to the driver       
+  }
 }
