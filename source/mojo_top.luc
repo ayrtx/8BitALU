@@ -20,104 +20,103 @@ module mojo_top (
   
   
   sig rst;                  // reset signal
-  sig mode;
-  sig result[8];
-  sig invalid;
+  sig mode;                 // mode signal to determine if doing auto or manual testing
+  sig result[8];            // result signal
+  sig invalid;              // show if alufn input is invalid
   
   
-  .clk(clk) {
+  .clk(clk) {   
     // The reset conditioner is used to synchronize the reset signal to the FPGA
     // clock. This ensures the entire FPGA comes out of reset at the same time.
     reset_conditioner reset_cond;
-    .rst(rst) {
+    .rst(rst) {                             
         timeinputname changeState;
         //dff test_case_counter[8];
-        dff falufn[6];
-        dff fa[8];
-        dff fb[8];
-        multi_seven_seg seg;
-        //fsm state(.clk(clk), #INIT(RESET)) = {RESET, ADD_TEST1, ADD_TEST2, SUB_TEST1, SUB_TEST2, MULT_TEST1, MULT_TEST2, ABS_TEST1, ABS_TEST2, AND_TEST1, AND_TEST2, OR_TEST1, OR_TEST2, XOR_TEST1, XOR_TEST2, A_TEST1, A_TEST2, B_TEST1, B_TEST2, NAND_TEST1, NAND_TEST2, NOR_TEST1, NOR_TEST2, XNOR_TEST1, XNOR_TEST2, CONSTM1_TEST1, CONSTM1_TEST2, CONST0_TEST1, CONST0_TEST2, SHL_TEST1, SHL_TEST2, SHR_TEST1, SHR_TEST2, SRA_TEST1, SRA_TEST2, CMPEQ_TEST1, CMPEQ_TEST2, CMPLT_TEST1, CMPLT_TEST2, CMPLE_TEST1, CMPLE_TEST2, CMPGT_TEST1, CMPGT_TEST2, CMPGE_TEST1, CMPGE_TEST2, ERROR, END};
-        fsm state(.clk(clk), #INIT(START)) = {START, TESTING, ERROR};
+        dff falufn[6];                  //declaring a flip flop as a variable for input alufn
+        dff fa[8];                      //declaring a flip flop as a variable for input a
+        dff fb[8];                      //declaring a flip flop as a variable for input b
+        multi_seven_seg seg;            //declaring multi seven segment 
+        fsm state(.clk(clk), #INIT(START)) = {START, TESTING, ERROR};      //declaring finite states
     }
   }
   
-  adder adder;
-  zvn zvn;
-  mult mult;
-  shifter8 shifter;
-  compare8 compare;
-  boolean boolean;
-  bin_to_dec binDec;
+  adder adder;                          //declaring of adder module, called adder
+  zvn zvn;                              //declaring of zvn module, called zvn
+  mult mult;                            //declaring of multiplication module, called mult
+  shifter8 shifter;                     //declaring of shifter module, called shifter8
+  compare8 compare;                     //declaring of comparator module, called compare8
+  boolean boolean;                      //declaring of boolean module, called boolean
+  bin_to_dec binDec;                    //declaring of binary to decimal module, called bin_to_dec
   
   always {
-  seg.values = {c{1,0,1,0},c{1,0,1,0},c{1,0,1,0},c{1,0,1,0}};
-  io_seg = ~seg.seg; // connect segments to the driver
+  seg.values = {c{1,0,1,0},c{1,0,1,0},c{1,0,1,0},c{1,0,1,0}};          //instantiating of seven segment LED
+  io_seg = ~seg.seg; // connect segments to the driver                 
   io_sel = ~seg.sel; // connect digit select to the driver   
 
       
   reset_cond.in = ~rst_n; // input raw inverted reset signal
   rst = reset_cond.out;   // conditioned reset 
     
-  io_led[0] = c{0,0,0,0,0,0,0,0};
-  binDec.value = c{0,0,0,0,0,0,0,0};
+  io_led[0] = c{0,0,0,0,0,0,0,0};                           //instantiate LED[0] to 0 (OFF)
+  binDec.value = c{0,0,0,0,0,0,0,0};                        //instantiate binDec
   
-      adder.alufn=io_dip[2][5:0];
-      adder.a = io_dip[1];
-      adder.b = io_dip[0];
+      adder.alufn=io_dip[2][5:0];                           //input of alufn 
+      adder.a = io_dip[1];                                  //input of a
+      adder.b = io_dip[0];                                  //input of b
         
-      zvn.a = io_dip[1];
-      zvn.b = io_dip[0];
-      zvn.alufn = io_dip[2][5:0];
+      zvn.a = io_dip[1];                                    //input of zvn a
+      zvn.b = io_dip[0];                                    //input of zvn b
+      zvn.alufn = io_dip[2][5:0];                           //input of zvn alufn
       
-      mult.a = io_dip[1];
-      mult.b = io_dip[0];
-      mult.alufn = io_dip[2][5:0];
+      mult.a = io_dip[1];                                   //input of multiplier a
+      mult.b = io_dip[0];                                   //input of multiplier b
+      mult.alufn = io_dip[2][5:0];                          //input of multiplier alufn
       
-      shifter.alufn=io_dip[2][5:0];
-      shifter.a = io_dip[1];
-      shifter.b = io_dip[0];
+      shifter.alufn=io_dip[2][5:0];`                        //input of shifter alufn
+      shifter.a = io_dip[1];                                //input of shifter a
+      shifter.b = io_dip[0];                                //input of shifter b
       
-      compare.alufn=io_dip[2][5:0];
-      compare.z = zvn.z;
-      compare.v = zvn.v;
-      compare.n = zvn.n;
+      compare.alufn=io_dip[2][5:0];                         //input of comparator input alufn
+      compare.z = zvn.z;                                    //input of comparator input z
+      compare.v = zvn.v;                                    //input of comparator input v
+      compare.n = zvn.n;                                    //input of comparator input n
       
-      boolean.alufn=io_dip[2][5:0];
-      boolean.a = io_dip[1];
-      boolean.b = io_dip[0];
+      boolean.alufn=io_dip[2][5:0];                         //input of boolean input alufn
+      boolean.a = io_dip[1];                                //input of boolean input a
+      boolean.b = io_dip[0];                                //input of boolean input b
       
-      result = 0;
-      io_led[0] = 0;
-      io_led[1] = 0;
+      result = 0;                                           //initialising result to value 0
+      io_led[0] = 0;                                        //initialising i0_led[0] to 0
+      io_led[1] = 0;                                        //initialising i0_led[1] to 0
 
-  mode = io_dip[2][7];
-  invalid = 0;
+  mode = io_dip[2][7];                                      //initialising mode as i0_dip[2][7]
+  invalid = 0;                                              //initialising invalid to value 0
       
   case(mode) {
-    b0:
-      if (state.q == state.START) {
-        falufn.d = io_dip[2][5:0];
-        fa.d = io_dip[0];
-        fb.d = io_dip[1];
+    b0:                                                     //when mode is b0
+      if (state.q == state.START) {                         //start state
+        falufn.d = io_dip[2][5:0];                          //alufn input from switch
+        fa.d = io_dip[0];                                   //a input from switch
+        fb.d = io_dip[1];                                   //b input from switch
       }
-      if (state.q == state.TESTING) {
-        state.d = state.START;
+      if (state.q == state.TESTING) {                       //when mode is testing
+        state.d = state.START;                              //change next state to start state
       }
-    b1:
+    b1:                                                     //when mode is b1
       if (state.q == state.START) {
-        falufn.d = b000000;
-        fa.d = 0;
-        fb.d = 0;
-        state.d = state.TESTING;
+        falufn.d = b000000;                                 //initialising alufn as b000000
+        fa.d = 0;                                           //initialising a as value 0 
+        fb.d = 0;                                           //initialising b as value 0 
+        state.d = state.TESTING;                            //change next state to testing state
       }
       
-      adder.alufn=falufn.q;
-      adder.a = fa.q;
-      adder.b = fb.q;
+      adder.alufn=falufn.q;                                 //initialising falufn.q as adder input alufn
+      adder.a = fa.q;                                       //initialising a as adder input fa.q
+      adder.b = fb.q;                                       //initialising b as adder input fb.q
         
-      zvn.a = fa.q;
-      zvn.b = fb.q;
-      zvn.alufn=falufn.q;
+      zvn.a = fa.q;                                         //initialising a as zvn input a 
+      zvn.b = fb.q;                                         //initialising b as zvn input b
+      zvn.alufn=falufn.q;                                   //initialising falufn.q as zvn input alufn
       
       mult.a = fa.q;
       mult.b = fb.q;
@@ -149,145 +148,145 @@ module mojo_top (
       }
     }
       case(falufn.q){
-        b000000: 
+        b000000:        //ADD
           invalid = 0;
           result = adder.sum;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q+fb.q) {
               state.d = state.ERROR;     
           }
-        b000001: 
+        b000001:        //SUB
           invalid = 0;
           result = adder.sum;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q-fb.q) {
               state.d = state.ERROR;     
           }
-        b000010: 
+        b000010:        //MULTIPLICATION
           invalid = 0;
           result = mult.multiplied;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q*fb.q) {
               state.d = state.ERROR;     
           }
-        b000011: 
+        b000011:        //ABS
           invalid = 0;
           result = mult.multiplied;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q*8b1) {
               state.d = state.ERROR;     
           }
-        b011000: 
+        b011000:        //AND
           invalid = 0;
           result = boolean.boole;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q&fb.q) {
               state.d = state.ERROR;  
           }
-        b011110: 
+        b011110:        //OR
           invalid = 0;
           result = boolean.boole;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q|fb.q) {
               state.d = state.ERROR;
               invalid = 2;}
-        b010110: 
+        b010110:        //XOR
           invalid = 0;
           result = boolean.boole + 1; // SPECIFICALLY FOR DEMONSTRATING ERROR
           if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q^fb.q) {
               state.d = state.ERROR;     
           }
-        b011010: 
+        b011010:        //A
           invalid = 0;
           result = boolean.boole;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q) {
               state.d = state.ERROR;
               invalid = 2;}
-        b011100: 
+        b011100:        //B
           invalid = 0;
           result = boolean.boole;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != fb.q) {
               state.d = state.ERROR;
               invalid = 2;}
-        b010101: 
+        b010101:        //NOTA
           invalid = 0;
           result = boolean.boole;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != ~(fa.q&fa.q)) {
               state.d = state.ERROR;
               invalid = 2;}
-        b010011: 
+        b010011:        //NOTB
           invalid = 0;
           result = boolean.boole;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != ~(fb.q&fb.q)) {
               state.d = state.ERROR;
               invalid = 2;}
-        b010111: 
+        b010111:        //NAND
           invalid = 0;
           result = boolean.boole;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != ~(fa.q&fb.q)) {
               state.d = state.ERROR;     
           }
-        b010001: 
+        b010001:        //NOR
           invalid = 0;
           result = boolean.boole;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != ~(fa.q|fb.q)) {
               state.d = state.ERROR;     
           }
-        b011001: 
+        b011001:        //NXOR
           invalid = 0;
           result = boolean.boole;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != ~(fa.q^fb.q)) {
               state.d = state.ERROR;     
           }
-        b011111: 
+        b011111:        //CONSTANT-1
           invalid = 0;
           result = boolean.boole;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != b11111111) {
               state.d = state.ERROR;     
           }
-        b010000: 
+        b010000:        //CONSTANT0
           invalid = 0;
           result = boolean.boole;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != b00000000) {
               state.d = state.ERROR;    
           }
-        b100000: 
+        b100000:        //SHL
           invalid = 0;
           result = shifter.shift;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q<<<fb.q[2:0]) { 
               state.d = state.ERROR;     
           }
-        b100001: 
+        b100001:        //SHR
           invalid = 0;
           result = shifter.shift;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q>>>fb.q[2:0]) {
               state.d = state.ERROR;    
           }
-        b100011: 
+        b100011:       //SRA
           invalid = 0;
           result = shifter.shift;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != $signed(fa.q)>>>fb.q[2:0]) {
               state.d = state.ERROR;     
           }
-        b110011: 
+        b110011:       //a==b
           invalid = 0;
           result = compare.cmp;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != (fa.q==fb.q)) {
               state.d = state.ERROR;    
           }
-        b110101: 
+        b110101:       //a<b
           invalid = 0;
           result = compare.cmp;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != (fa.q<fb.q)) {
               state.d = state.ERROR;     
           }
-        b110111: 
+        b110111:       //a<=b
           invalid = 0;
           result = compare.cmp;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != (fa.q<=fb.q)) {
               state.d = state.ERROR;     
           }
-        b111001: 
+        b111001:       //a>b
           invalid = 0;
           result = compare.cmp;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != (fa.q>fb.q)) {
               state.d = state.ERROR;     
           }
-        b111011: 
+        b111011:      //a>=b
           invalid = 0;
           result = compare.cmp;
           if (mode == b1 && changeState.currentCounter == 26b1 && result != (fa.q>=fb.q)) {
@@ -303,15 +302,15 @@ module mojo_top (
     io_led[0] = fa.q;
     io_led[1] = fb.q;
     io_led[2] = result;
-    if (result[7] == 1){
-      binDec.value = 128 - result[6:0];
+    if (result[7] == 1){           //if result<0, negative sign displayed, followed by number        
+      binDec.value = 128 - result[6:0];                   
       seg.values = {c{1,0,1,1},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
     }
-    else{
+    else{                          //if result>=0, number itself is displayed 
       binDec.value = result[6:0];
       seg.values = {c{1,0,1,0},binDec.digits[2],binDec.digits[1],binDec.digits[0]};
     }
-    if (invalid == 1){
+    if (invalid == 1){             //display a dash when alufn input is invalid
       seg.values = {c{1,0,1,1},c{1,0,1,1},c{1,0,1,1},c{1,0,1,1}};
     }
         
