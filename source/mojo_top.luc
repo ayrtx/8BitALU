@@ -182,39 +182,39 @@ module mojo_top (
         b011110: 
           invalid = 0;
           result = boolean.boole;
-          //if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q|fb.q) {
-             // state.d = state.ERROR;
-            //  invalid = 2;}
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q|fb.q) {
+              state.d = state.ERROR;
+              invalid = 2;}
         b010110: 
           invalid = 0;
-          result = boolean.boole;
+          result = boolean.boole + 1; // SPECIFICALLY FOR DEMONSTRATING ERROR
           if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q^fb.q) {
               state.d = state.ERROR;     
           }
         b011010: 
           invalid = 0;
           result = boolean.boole;
-          //if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q) {
-             // state.d = state.ERROR;
-             // invalid = 2;}
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != fa.q) {
+              state.d = state.ERROR;
+              invalid = 2;}
         b011100: 
           invalid = 0;
           result = boolean.boole;
-        //  if (mode == b1 && changeState.currentCounter == 26b1 && result != fb.q) {
-            //  state.d = state.ERROR;
-             // invalid = 2;}
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != fb.q) {
+              state.d = state.ERROR;
+              invalid = 2;}
         b010101: 
           invalid = 0;
           result = boolean.boole;
-        //  if (mode == b1 && changeState.currentCounter == 26b1 && result != ~(fa.q&fa.q)) {
-           //   state.d = state.ERROR;
-            //  invalid = 2;}
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != ~(fa.q&fa.q)) {
+              state.d = state.ERROR;
+              invalid = 2;}
         b010011: 
           invalid = 0;
           result = boolean.boole;
-        //  if (mode == b1 && changeState.currentCounter == 26b1 && result != ~(fb.q&fb.q)) {
-            //  state.d = state.ERROR;
-            //  invalid = 2;}
+          if (mode == b1 && changeState.currentCounter == 26b1 && result != ~(fb.q&fb.q)) {
+              state.d = state.ERROR;
+              invalid = 2;}
         b010111: 
           invalid = 0;
           result = boolean.boole;
