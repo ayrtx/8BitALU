@@ -7,6 +7,7 @@
 module mojo_top_0 (
     input clk,
     input rst_n,
+    output reg [7:0] led,
     input cclk,
     input spi_ss,
     input spi_mosi,
@@ -21,6 +22,10 @@ module mojo_top_0 (
   
   reg rst;
   
+  reg mode;
+  
+  reg [7:0] result;
+  
   wire [1-1:0] M_reset_cond_out;
   reg [1-1:0] M_reset_cond_in;
   reset_conditioner_1 reset_cond (
@@ -28,58 +33,343 @@ module mojo_top_0 (
     .in(M_reset_cond_in),
     .out(M_reset_cond_out)
   );
+  wire [26-1:0] M_changeState_currentCounter;
+  timeinputname_2 changeState (
+    .clk(clk),
+    .rst(rst),
+    .currentCounter(M_changeState_currentCounter)
+  );
+  reg [7:0] M_test_case_counter_d, M_test_case_counter_q = 1'h0;
+  reg [5:0] M_falufn_d, M_falufn_q = 1'h0;
+  reg [7:0] M_fa_d, M_fa_q = 1'h0;
+  reg [7:0] M_fb_d, M_fb_q = 1'h0;
+  localparam START_state = 2'd0;
+  localparam TESTING_state = 2'd1;
+  localparam ERROR_state = 2'd2;
   
-  reg nandab;
+  reg [1:0] M_state_d, M_state_q = START_state;
   
-  reg nandaci;
+  wire [8-1:0] M_adder_sum;
+  reg [8-1:0] M_adder_a;
+  reg [8-1:0] M_adder_b;
+  reg [6-1:0] M_adder_alufn;
+  adder_3 adder (
+    .a(M_adder_a),
+    .b(M_adder_b),
+    .alufn(M_adder_alufn),
+    .sum(M_adder_sum)
+  );
   
-  reg nandbci;
+  wire [1-1:0] M_zvn_z;
+  wire [1-1:0] M_zvn_v;
+  wire [1-1:0] M_zvn_n;
+  reg [6-1:0] M_zvn_alufn;
+  reg [8-1:0] M_zvn_a;
+  reg [8-1:0] M_zvn_b;
+  zvn_4 zvn (
+    .alufn(M_zvn_alufn),
+    .a(M_zvn_a),
+    .b(M_zvn_b),
+    .z(M_zvn_z),
+    .v(M_zvn_v),
+    .n(M_zvn_n)
+  );
   
-  reg xorab;
+  wire [8-1:0] M_mult_multiplied;
+  reg [8-1:0] M_mult_a;
+  reg [8-1:0] M_mult_b;
+  reg [6-1:0] M_mult_alufn;
+  mult_5 mult (
+    .a(M_mult_a),
+    .b(M_mult_b),
+    .alufn(M_mult_alufn),
+    .multiplied(M_mult_multiplied)
+  );
   
-  reg [7:0] sum;
+  wire [8-1:0] M_shifter_shift;
+  reg [6-1:0] M_shifter_alufn;
+  reg [8-1:0] M_shifter_a;
+  reg [8-1:0] M_shifter_b;
+  shifter8_6 shifter (
+    .alufn(M_shifter_alufn),
+    .a(M_shifter_a),
+    .b(M_shifter_b),
+    .shift(M_shifter_shift)
+  );
   
-  reg [7:0] co;
+  wire [8-1:0] M_compare_cmp;
+  reg [1-1:0] M_compare_z;
+  reg [1-1:0] M_compare_v;
+  reg [1-1:0] M_compare_n;
+  reg [6-1:0] M_compare_alufn;
+  compare8_7 compare (
+    .z(M_compare_z),
+    .v(M_compare_v),
+    .n(M_compare_n),
+    .alufn(M_compare_alufn),
+    .cmp(M_compare_cmp)
+  );
   
-  integer i;
+  wire [8-1:0] M_boolean_boole;
+  reg [6-1:0] M_boolean_alufn;
+  reg [8-1:0] M_boolean_a;
+  reg [8-1:0] M_boolean_b;
+  boolean_8 boolean (
+    .alufn(M_boolean_alufn),
+    .a(M_boolean_a),
+    .b(M_boolean_b),
+    .boole(M_boolean_boole)
+  );
   
   always @* begin
+    M_state_d = M_state_q;
+    M_falufn_d = M_falufn_q;
+    M_fa_d = M_fa_q;
+    M_fb_d = M_fb_q;
+    
     M_reset_cond_in = ~rst_n;
     rst = M_reset_cond_out;
-    sum = 8'h00;
-    co = 8'h00;
-    for (i = 1'h0; i < 4'h8; i = i + 1) begin
-      nandab = io_dip[0+(i)*1+0-:1] & io_dip[8+(i)*1+0-:1];
-      if (nandab == 1'h1) begin
-        nandab = 1'h0;
-      end else begin
-        nandab = 1'h1;
-      end
-      nandaci = io_dip[0+(i)*1+0-:1] & co[(i)*1+0-:1];
-      if (nandaci == 1'h1) begin
-        nandaci = 1'h0;
-      end else begin
-        nandaci = 1'h1;
-      end
-      nandbci = io_dip[8+(i)*1+0-:1] & co[(i)*1+0-:1];
-      if (nandbci == 1'h1) begin
-        nandbci = 1'h0;
-      end else begin
-        nandbci = 1'h1;
-      end
-      if (i != 3'h7) begin
-        co[(i + 1'h1)*1+0-:1] = nandab & nandaci & nandbci;
-        if (co[(i + 1'h1)*1+0-:1] == 1'h1) begin
-          co[(i + 1'h1)*1+0-:1] = 1'h0;
-        end else begin
-          co[(i + 1'h1)*1+0-:1] = 1'h1;
+    io_led[0+7-:8] = 8'h00;
+    M_adder_alufn = io_dip[16+0+5-:6];
+    M_adder_a = io_dip[8+7-:8];
+    M_adder_b = io_dip[0+7-:8];
+    M_zvn_a = io_dip[8+7-:8];
+    M_zvn_b = io_dip[0+7-:8];
+    M_zvn_alufn = io_dip[16+0+5-:6];
+    M_mult_a = io_dip[8+7-:8];
+    M_mult_b = io_dip[0+7-:8];
+    M_mult_alufn = io_dip[16+0+5-:6];
+    M_shifter_alufn = io_dip[16+0+5-:6];
+    M_shifter_a = io_dip[8+7-:8];
+    M_shifter_b = io_dip[0+7-:8];
+    M_compare_alufn = io_dip[16+0+5-:6];
+    M_compare_z = M_zvn_z;
+    M_compare_v = M_zvn_v;
+    M_compare_n = M_zvn_n;
+    M_boolean_alufn = io_dip[16+0+5-:6];
+    M_boolean_a = io_dip[8+7-:8];
+    M_boolean_b = io_dip[0+7-:8];
+    result = 1'h0;
+    io_led[0+7-:8] = 1'h0;
+    io_led[8+7-:8] = 1'h0;
+    mode = io_dip[16+7+0-:1];
+    
+    case (mode)
+      1'h0: begin
+        if (M_state_q == START_state) begin
+          M_falufn_d = io_dip[16+0+5-:6];
+          M_fa_d = io_dip[0+7-:8];
+          M_fb_d = io_dip[8+7-:8];
+        end
+        if (M_state_q == TESTING_state) begin
+          M_state_d = START_state;
         end
       end
-      xorab = io_dip[0+(i)*1+0-:1] ^ io_dip[8+(i)*1+0-:1];
-      sum[(i)*1+0-:1] = xorab ^ co[(i)*1+0-:1];
-    end
-    io_led[0+7-:8] = sum;
-    io_led[8+7-:8] = sum;
-    io_led[16+7-:8] = sum;
+      1'h1: begin
+        if (M_state_q == START_state) begin
+          M_falufn_d = 6'h10;
+          M_fa_d = 1'h0;
+          M_fb_d = 1'h0;
+          M_state_d = TESTING_state;
+        end
+        M_adder_alufn = M_falufn_q;
+        M_adder_a = M_fa_q;
+        M_adder_b = M_fb_q;
+        M_zvn_a = M_fa_q;
+        M_zvn_b = M_fb_q;
+        M_zvn_alufn = M_falufn_q;
+        M_mult_a = M_fa_q;
+        M_mult_b = M_fb_q;
+        M_mult_alufn = M_falufn_q;
+        M_shifter_alufn = M_falufn_q;
+        M_shifter_a = M_fa_q;
+        M_shifter_b = M_fb_q;
+        M_compare_alufn = M_falufn_q;
+        M_compare_z = M_zvn_z;
+        M_compare_v = M_zvn_v;
+        M_compare_n = M_zvn_n;
+        M_boolean_alufn = M_falufn_q;
+        M_boolean_a = M_fa_q;
+        M_boolean_b = M_fb_q;
+        if (M_changeState_currentCounter == 26'h0000001 && M_state_q == TESTING_state) begin
+          M_fb_d = M_fb_q + 1'h1;
+          if (M_fb_q == 8'h01) begin
+            M_fb_d = 1'h0;
+            M_fa_d = M_fa_q + 1'h1;
+            if (M_fa_q == 8'h01) begin
+              M_fa_d = 1'h0;
+              M_falufn_d = M_falufn_q + 1'h1;
+            end
+          end
+        end
+      end
+    endcase
+    
+    case (M_falufn_q)
+      6'h00: begin
+        result = M_adder_sum;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != M_fa_q + M_fb_q) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h01: begin
+        result = M_adder_sum;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != M_fa_q - M_fb_q) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h02: begin
+        result = M_mult_multiplied;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != M_fa_q * M_fb_q) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h03: begin
+        result = M_mult_multiplied;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != M_fa_q * 8'h01) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h18: begin
+        result = M_boolean_boole;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != M_fa_q & M_fb_q) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h1e: begin
+        result = M_boolean_boole;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != M_fa_q | M_fb_q) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h16: begin
+        result = M_boolean_boole;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != M_fa_q ^ M_fb_q) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h1a: begin
+        result = M_boolean_boole;
+      end
+      6'h1c: begin
+        result = M_boolean_boole;
+      end
+      6'h15: begin
+        result = M_boolean_boole;
+      end
+      6'h13: begin
+        result = M_boolean_boole;
+      end
+      6'h17: begin
+        result = M_boolean_boole;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != ~(M_fa_q & M_fb_q)) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h11: begin
+        result = M_boolean_boole;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != ~(M_fa_q | M_fb_q)) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h19: begin
+        result = M_boolean_boole;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != ~(M_fa_q ^ M_fb_q)) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h1f: begin
+        result = M_boolean_boole;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != 8'h01) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h10: begin
+        result = M_boolean_boole;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != 8'h00) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h20: begin
+        result = M_shifter_shift;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != M_fa_q <<< M_fb_q[0+2-:3]) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h21: begin
+        result = M_shifter_shift;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != M_fa_q >>> M_fb_q[0+2-:3]) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h23: begin
+        result = M_shifter_shift;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != $signed(M_fa_q) >>> M_fb_q[0+2-:3]) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h33: begin
+        result = M_compare_cmp;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != (M_fa_q == M_fb_q)) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h35: begin
+        result = M_compare_cmp;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != (M_fa_q < M_fb_q)) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h37: begin
+        result = M_compare_cmp;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != (M_fa_q <= M_fb_q)) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h39: begin
+        result = M_compare_cmp;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != (M_fa_q > M_fb_q)) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      6'h3b: begin
+        result = M_compare_cmp;
+        if (mode == 1'h1 && M_changeState_currentCounter == 26'h0000001 && result != (M_fa_q >= M_fb_q)) begin
+          M_state_d = ERROR_state;
+        end
+      end
+      default: begin
+        result = 1'h0;
+      end
+    endcase
+    led = 1'h0;
+    led[0+5-:6] = M_falufn_q;
+    io_led[0+7-:8] = M_fa_q;
+    io_led[8+7-:8] = M_fb_q;
+    io_led[16+7-:8] = result;
   end
+  
+  always @(posedge clk) begin
+    if (rst == 1'b1) begin
+      M_test_case_counter_q <= 1'h0;
+      M_falufn_q <= 1'h0;
+      M_fa_q <= 1'h0;
+      M_fb_q <= 1'h0;
+    end else begin
+      M_test_case_counter_q <= M_test_case_counter_d;
+      M_falufn_q <= M_falufn_d;
+      M_fa_q <= M_fa_d;
+      M_fb_q <= M_fb_d;
+    end
+  end
+  
+  
+  always @(posedge clk) begin
+    if (rst == 1'b1) begin
+      M_state_q <= 1'h0;
+    end else begin
+      M_state_q <= M_state_d;
+    end
+  end
+  
 endmodule
