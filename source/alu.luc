@@ -1,42 +1,42 @@
 module alu (    
-    input alufn[6], 
-    input a[8], 
-    input b[8],    
-    output z,  
-    output v,  
-    output n,  
-    output out[8]  
+    input alufn[6],           //input of alufn
+    input a[8],               //input of a
+    input b[8],               //input of b
+    output z,                 //output of z
+    output v,                 //output of v
+    output n,                 //output of n
+    output out[8]             //output of out
   ) {  
   
-    adder adder;  
-    zvn zvn; 
-    mult mult;
-    shifter8 shifter; 
-    compare8 compare; 
-    boolean boolean;   
+    adder adder;              //declaring of adder module, called adder
+    zvn zvn;                  //declaring of zvn module, called zvn
+    mult mult;                //declaring of multiplication module, called mult
+    shifter8 shifter;         //declaring of shifter module, called shifter8
+    compare8 compare;         //declaring of comparator module, called compare8
+    boolean boolean;          //declaring of boolean module, called boolean
     
-  always {   
-    adder.a = a;    
-    adder.b = b;   
-    adder.alufn = alufn; 
-    zvn.a = a; 
-    zvn.b = b;
-    zvn.alufn = alufn;       
-    boolean.a = a;   
-    boolean.b = b;   
-    boolean.alufn = alufn;  
-    shifter.a =a;  
-    shifter.b =b;  
-    shifter.alufn = alufn;     
-    compare.z = zvn.z;   
-    compare.v = zvn.v;   
-    compare.n = zvn.n;   
-    compare.alufn = alufn;
-    z = zvn.z;  
-    v = zvn.v;   
-    n = zvn.n;   
+  always {      
+    adder.a = a;              //initialising a as adder input a 
+    adder.b = b;              //initialising b as adder input b 
+    adder.alufn = alufn;      //initialising alufn as adder input alufn
+    zvn.a = a;                //initialising a as zvn input a 
+    zvn.b = b;                //initialising b as zvn input b
+    zvn.alufn = alufn;        //initialising alufn as zvn input alufn
+    boolean.a = a;            //initialising a as boolean input a
+    boolean.b = b;            //initialising b as boolean input b
+    boolean.alufn = alufn;    //initialising alufn as boolean input alufn
+    shifter.a =a;             //initialising a as shifter input a
+    shifter.b =b;             //initialising b as shifter input b
+    shifter.alufn = alufn;    //initialising alufn as shifter input alufn
+    compare.z = zvn.z;        //initialising zvn.z as comparator output z
+    compare.v = zvn.v;        //initialising zvn.v as comparator output v
+    compare.n = zvn.n;        //initialising zvn.n as comparator output n
+    compare.alufn = alufn;    //initialising alufn as comparator output alufn
+    z = zvn.z;                //initialising zvn.z as output z
+    v = zvn.v;                //initialising zvn.v as output v
+    n = zvn.n;                //initialising zvn.n as output n
     
-    case(alufn[5:4]){  
+    case(alufn[5:4]){         
       b00:      
         out = adder.sum; // adder module    
       b01:     
@@ -46,7 +46,7 @@ module alu (   
       b11:       
         out = compare.cmp; // compare module     
       default:    
-        out = 8b0;  
+        out = 8b0;        //default value of output
     }  
   }
 }
