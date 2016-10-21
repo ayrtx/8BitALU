@@ -7,12 +7,14 @@ module alu (   
     output n,  
     output out[8]  
   ) {  
+  
     adder adder;  
     zvn zvn; 
     mult mult;
     shifter8 shifter; 
     compare8 compare; 
     boolean boolean;   
+    
   always {   
     adder.a = a;    
     adder.b = b;   
@@ -33,6 +35,7 @@ module alu (   
     z = zvn.z;  
     v = zvn.v;   
     n = zvn.n;   
+    
     case(alufn[5:4]){  
       b00:      
         out = adder.sum; // adder module    
